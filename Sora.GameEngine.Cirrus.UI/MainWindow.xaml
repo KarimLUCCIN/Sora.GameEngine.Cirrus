@@ -90,7 +90,9 @@
                     <ad:DockablePane ad:ResizingPanel.ResizeWidth="200">
 
                         <ad:DockableContent x:Name="propertiesContent" Title="Properties" IsCloseable="False">
-                            <controls:WpfPropertyGrid x:Name="globalPropertyGrid"></controls:WpfPropertyGrid>
+                            <controls:WpfPropertyGrid x:Name="globalPropertyGrid" 
+                                                      HelpVisible="True" 
+                                                      ToolbarVisible="True"></controls:WpfPropertyGrid>
                         </ad:DockableContent>
 
                         <ad:DockableContent x:Name="sceneTreeContent" IsCloseable="False" Title="Package">

@@ -49,6 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CirrusDesignHelper.cs" />
+    <Compile Include="Info\XmlCrInfo.cs" />
+    <Compile Include="Info\XmlCrInfoEntry.cs" />
     <Compile Include="Packages\XmlCirrusPackage.cs" />
     <Compile Include="Packages\XmlCirrusPackageReference.cs" />
     <Compile Include="Packages\XmlCirrusXNAReference.cs" />

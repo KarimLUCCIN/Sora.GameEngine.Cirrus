@@ -4,6 +4,7 @@
 // WpfPropertyGrid - By Jaime Olivares
 // July 11, 2011
 // Article site: http://www.codeproject.com/KB/grid/WpfPropertyGrid.aspx
+//               http://www.codeproject.com/Articles/87715/Native-WPF-4-PropertyGrid
 // Author site: www.jaimeolivares.com
 // License: Code Project Open License (CPOL)
 //

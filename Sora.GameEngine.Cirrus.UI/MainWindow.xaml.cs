@@ -38,6 +38,7 @@ namespace Sora.GameEngine.Cirrus.UI
             if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "SelectionForProperties")
             {
                 globalPropertyGrid.SelectedObjects = editorApplication.SelectionForProperties;
+                globalPropertyGrid.RefreshPropertyList();
             }
         }
 
