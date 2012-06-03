@@ -1,0 +1,68 @@
+﻿<Window x:Class="Sora.GameEngine.Cirrus.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
+        Title="MainWindow" Height="400" Width="525" Background="#FF626262" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+
+        <ad:DockingManager Grid.Row="1" x:Name="windowDockingManager" Loaded="windowDockingManager_Loaded">
+            <ad:ResizingPanel Orientation="Vertical">
+                <ad:ResizingPanel Orientation="Vertical" ad:ResizingPanel.ResizeHeight="50">
+                    <ad:DockablePane ShowHeader="False" ShowTabs="False">
+                        <ad:DockableContent x:Name="toolbarBuild" Title="Build" IsCloseable="False">
+                            
+                        </ad:DockableContent>
+                    </ad:DockablePane>
+                </ad:ResizingPanel>
+
+                <ad:ResizingPanel Orientation="Horizontal">
+                    <ad:DockablePane ad:ResizingPanel.ResizeWidth="200">
+
+                        <ad:DockableContent x:Name="propertiesContent" Title="Properties" IsCloseable="False">
+                            
+                        </ad:DockableContent>
+
+                        <ad:DockableContent x:Name="sceneTreeContent" IsCloseable="False" Title="Tree">
+
+                        </ad:DockableContent>
+
+                        <ad:DockableContent x:Name="debugOutputContent" IsCloseable="False" Title="Output">
+
+                        </ad:DockableContent>
+                    </ad:DockablePane>
+
+                    <ad:DocumentPane>
+                        <ad:DocumentContent IsCloseable="False" Title="Preview">
+
+                        </ad:DocumentContent>
+                    </ad:DocumentPane>
+                </ad:ResizingPanel>
+            </ad:ResizingPanel>
+        </ad:DockingManager>
+        
+        <Menu Grid.Row="0">
+            <MenuItem Header="File">
+                
+            </MenuItem>
+            
+            <MenuItem Header="About">
+                
+            </MenuItem>
+        </Menu>
+        
+        <StackPanel Grid.Row="2">
+            <StackPanel.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#FF626262" Offset="0"/>
+                    <GradientStop Color="#FF2D2C2C" Offset="1"/>
+                    <GradientStop Color="#FF525252" Offset="0.5"/>
+                </LinearGradientBrush>
+            </StackPanel.Background>
+        </StackPanel>
+    </Grid>
+</Window>
