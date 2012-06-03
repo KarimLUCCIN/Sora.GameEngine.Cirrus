@@ -4,6 +4,7 @@
         xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
         xmlns:controls="clr-namespace:System.Windows.Controls"
         xmlns:local="clr-namespace:Sora.GameEngine.Cirrus.UI.Controls"
+        xmlns:selectors="clr-namespace:Sora.GameEngine.Cirrus.UI.Selectors"
         Title="MainWindow" Height="400" Width="525" Background="#FF626262" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <DataTemplate x:Key="ReferencesItemTemplate">
@@ -16,6 +17,45 @@
                 <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{Binding Reference}" VerticalAlignment="Center"/>
             </Grid>
         </DataTemplate>
+
+        <HierarchicalDataTemplate x:Key="content_DirectoryTemplate" ItemsSource="{Binding Content}">
+            <Grid Height="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{Binding Title}" VerticalAlignment="Center"/>
+            </Grid>
+        </HierarchicalDataTemplate>
+
+        <DataTemplate x:Key="content_File">
+            <Grid Height="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{Binding Title}" VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="content_Error">
+            <Grid Height="24" ToolTip="{Binding ErrorString}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="1" Margin="10,0,0,0" Foreground="Red" Text="{Binding Title}" VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+
+        <selectors:ContentTemplateSelector x:Key="contentTemplateSelector"
+                                           DirectoryTemplate="{StaticResource content_DirectoryTemplate}"
+                                           FileTemplate="{StaticResource content_File}"
+                                           ErrorTemplate="{StaticResource content_Error}"
+                                           />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -53,8 +93,24 @@
                             <controls:WpfPropertyGrid x:Name="globalPropertyGrid"></controls:WpfPropertyGrid>
                         </ad:DockableContent>
 
-                        <ad:DockableContent x:Name="sceneTreeContent" IsCloseable="False" Title="Tree">
+                        <ad:DockableContent x:Name="sceneTreeContent" IsCloseable="False" Title="Package">
+                            <Border Background="White">
+                                <local:MultipleSelectionTreeView SelectionMode="KeyboardModifiersMode" ItemsSource="{Binding PackageContainer}" x:Name="packageContentTree" Background="White"
+                                                                 SelectionChanged="packageContentTree_SelectionChanged">
+                                    <local:MultipleSelectionTreeView.ItemTemplate>
+                                        <HierarchicalDataTemplate ItemsSource="{Binding Content}" ItemTemplateSelector="{StaticResource contentTemplateSelector}">
+                                            <Grid Height="24">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="24"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
 
+                                                <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="Package" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </HierarchicalDataTemplate>
+                                    </local:MultipleSelectionTreeView.ItemTemplate>
+                                </local:MultipleSelectionTreeView>
+                            </Border>
                         </ad:DockableContent>
 
                         <ad:DockableContent x:Name="referencesContent" IsCloseable="False" Title="References">

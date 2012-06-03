@@ -72,6 +72,7 @@
     <Compile Include="Controls\MultipleSelectionTreeViewItem.cs" />
     <Compile Include="Controls\WpfPropertyGrid.cs" />
     <Compile Include="EditorBindings\EditorUIApplication.cs" />
+    <Compile Include="Selectors\ContentTemplateSelector.cs" />
     <Compile Include="SkinScrollBar\SkinScrollBarResources.cs" />
     <Page Include="Controls\Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>

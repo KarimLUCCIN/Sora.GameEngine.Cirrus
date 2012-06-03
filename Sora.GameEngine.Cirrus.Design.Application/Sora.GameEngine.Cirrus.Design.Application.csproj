@@ -47,9 +47,13 @@
   <ItemGroup>
     <Compile Include="EditorApplication.cs" />
     <Compile Include="EditorBaseBoundObject.cs" />
+    <Compile Include="EditorContentDirectory.cs" />
+    <Compile Include="EditorContentFile.cs" />
+    <Compile Include="EditorContentObject.cs" />
     <Compile Include="EditorPackageReferencesObject.cs" />
     <Compile Include="EditorXNAReferencesObject.cs" />
     <Compile Include="GenericCommand.cs" />
+    <Compile Include="EditorPackageContainerObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

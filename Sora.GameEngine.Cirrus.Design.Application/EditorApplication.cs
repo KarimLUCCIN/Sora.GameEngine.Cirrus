@@ -20,6 +20,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             currentPackage = new XmlCirrusPackage();
 
             InitializeNewPackage();
+
+            PackageContainer[0].RefreshContent();
         }
 
         private void InitializeObjects()
@@ -29,6 +31,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             PackageReferences = new EditorBaseBoundObject[]{
                 new EditorXNAReferencesObject(this),
                 new EditorPackageReferencesObject(this)};
+
+            PackageContainer = new[] { new EditorPackageContainerObject(this) };
         }
 
         object[] selectionForProperties = new object[0];
@@ -81,6 +85,18 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             }
         }
 
+        private EditorPackageContainerObject[] packageContainer;
+
+        public EditorPackageContainerObject[] PackageContainer
+        {
+            get { return packageContainer; }
+            private set
+            {
+                packageContainer = value;
+                RaisePropertyChanged("PackageContainer");
+            }
+        }
+        
         #endregion
 
         /// <summary>

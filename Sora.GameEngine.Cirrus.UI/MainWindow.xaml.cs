@@ -50,5 +50,10 @@ namespace Sora.GameEngine.Cirrus.UI
         {
             editorApplication.SelectionForProperties = (from element in referencesContentTree.SelectedItems select element.DataContext).ToArray();
         }
+
+        private void packageContentTree_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            editorApplication.SelectionForProperties = (from element in packageContentTree.SelectedItems select element.DataContext).ToArray();
+        }
     }
 }
