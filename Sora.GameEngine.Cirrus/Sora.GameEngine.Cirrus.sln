@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sora.GameEngine.Cirrus.Desi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sora.GameEngine.Cirrus.UI", "..\Sora.GameEngine.Cirrus.UI\Sora.GameEngine.Cirrus.UI.csproj", "{E5328865-FBCB-4685-B21F-3A3F272617FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sora.GameEngine.Cirrus.Design.Application", "..\Sora.GameEngine.Cirrus.Design.Application\Sora.GameEngine.Cirrus.Design.Application.csproj", "{7514B385-CB89-44D7-BE1D-E8E05F691F55}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,16 @@ Global
 		{E5328865-FBCB-4685-B21F-3A3F272617FB}.Release|Mixed Platforms.Build.0 = Release|x86
 		{E5328865-FBCB-4685-B21F-3A3F272617FB}.Release|x86.ActiveCfg = Release|x86
 		{E5328865-FBCB-4685-B21F-3A3F272617FB}.Release|x86.Build.0 = Release|x86
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7514B385-CB89-44D7-BE1D-E8E05F691F55}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

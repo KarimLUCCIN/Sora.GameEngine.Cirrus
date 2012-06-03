@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Sora.GameEngine.Cirrus.UI.EditorBindings;
 
 namespace Sora.GameEngine.Cirrus.UI
 {
@@ -19,14 +20,35 @@ namespace Sora.GameEngine.Cirrus.UI
     /// </summary>
     public partial class MainWindow : Window
     {
+        public EditorUIApplication editorApplication;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            editorApplication = new EditorUIApplication(this);
+            DataContext = editorApplication;
+
+            editorApplication.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(editorApplication_PropertyChanged);
+            globalPropertyGrid.SelectedObjects = editorApplication.SelectionForProperties;
+        }
+
+        void editorApplication_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "SelectionForProperties")
+            {
+                globalPropertyGrid.SelectedObjects = editorApplication.SelectionForProperties;
+            }
         }
 
         private void windowDockingManager_Loaded(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void referencesContentTree_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            editorApplication.SelectionForProperties = (from element in referencesContentTree.SelectedItems select element.DataContext).ToArray();
         }
     }
 }

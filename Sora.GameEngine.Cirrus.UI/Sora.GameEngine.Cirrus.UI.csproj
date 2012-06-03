@@ -11,7 +11,8 @@
     <RootNamespace>Sora.GameEngine.Cirrus.UI</RootNamespace>
     <AssemblyName>CirrusUI</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -47,6 +48,7 @@
     </Reference>
     <Reference Include="PresentationFramework.Classic" />
     <Reference Include="System" />
+    <Reference Include="System.Activities.Presentation" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -65,7 +67,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\LeftMarginMultiplierConverter.cs" />
+    <Compile Include="Controls\MultipleSelectionTreeView.cs" />
+    <Compile Include="Controls\MultipleSelectionTreeViewItem.cs" />
+    <Compile Include="Controls\WpfPropertyGrid.cs" />
+    <Compile Include="EditorBindings\EditorUIApplication.cs" />
     <Compile Include="SkinScrollBar\SkinScrollBarResources.cs" />
+    <Page Include="Controls\Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -109,6 +120,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -119,6 +131,10 @@
     <Resource Include="LogoPure.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Sora.GameEngine.Cirrus.Design.Application\Sora.GameEngine.Cirrus.Design.Application.csproj">
+      <Project>{7514B385-CB89-44D7-BE1D-E8E05F691F55}</Project>
+      <Name>Sora.GameEngine.Cirrus.Design.Application</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sora.GameEngine.Cirrus.Design\Sora.GameEngine.Cirrus.Design.csproj">
       <Project>{E559541E-585B-4C4F-8F30-BEEE381F57C7}</Project>
       <Name>Sora.GameEngine.Cirrus.Design</Name>

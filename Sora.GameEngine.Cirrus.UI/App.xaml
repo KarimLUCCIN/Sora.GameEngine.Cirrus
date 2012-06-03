@@ -6,7 +6,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/PresentationFramework.Aero, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, ProcessorArchitecture=MSIL;component/themes/Aero.NormalColor.xaml"/>
-                <!--<ResourceDictionary Source="/WPG;component/Themes/ExpressionBlend.xaml" />-->
+                <ResourceDictionary Source="Controls/Themes/Generic.xaml"/>
                 <ResourceDictionary Source="/AvalonDock.Themes;component/themes/ExpressionDark.xaml"/>
                 <ResourceDictionary Source="SkinScrollBar/SkinScrollBarResources.xaml"/>
                 <ResourceDictionary Source="SkinResources.xaml"/>

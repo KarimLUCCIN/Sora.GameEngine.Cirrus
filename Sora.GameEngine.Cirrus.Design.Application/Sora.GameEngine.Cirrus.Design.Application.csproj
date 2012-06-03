@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D5866464-EA08-4002-91C8-044C0D155B53}</ProjectGuid>
+    <ProjectGuid>{7514B385-CB89-44D7-BE1D-E8E05F691F55}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sora.GameEngine.Cirrus</RootNamespace>
-    <AssemblyName>Sora.GameEngine.Cirrus</AssemblyName>
+    <RootNamespace>Sora.GameEngine.Cirrus.Design.Application</RootNamespace>
+    <AssemblyName>Sora.GameEngine.Cirrus.Design.Application</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,6 +32,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,10 +45,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CirrusContentManager.cs" />
-    <Compile Include="Descriptor\XmlCirrusBuiltPackageDescriptor.cs" />
-    <Compile Include="Descriptor\XmlCirrusBuiltPackageItem.cs" />
+    <Compile Include="EditorApplication.cs" />
+    <Compile Include="EditorBaseBoundObject.cs" />
+    <Compile Include="EditorPackageReferencesObject.cs" />
+    <Compile Include="EditorXNAReferencesObject.cs" />
+    <Compile Include="GenericCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sora.GameEngine.Cirrus.Design\Sora.GameEngine.Cirrus.Design.csproj">
+      <Project>{E559541E-585B-4C4F-8F30-BEEE381F57C7}</Project>
+      <Name>Sora.GameEngine.Cirrus.Design</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sora.GameEngine.Cirrus\Sora.GameEngine.Cirrus.csproj">
+      <Project>{D5866464-EA08-4002-91C8-044C0D155B53}</Project>
+      <Name>Sora.GameEngine.Cirrus</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
