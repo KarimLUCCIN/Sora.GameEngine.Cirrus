@@ -25,6 +25,7 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
         {
             XNAReferences = new ObservableCollection<XmlCirrusXNAReference>();
             CirrusReferences = new ObservableCollection<XmlCirrusPackageReference>();
+            CirrusContentInfo = new ObservableCollection<XmlCirrusContentInfo>();
         }
 
         [XmlAttribute("name")]
@@ -64,5 +65,12 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
         [XmlArray("cirrus")]
         [XmlArrayItem("package", typeof(XmlCirrusPackageReference))]
         public ObservableCollection<XmlCirrusPackageReference> CirrusReferences { get; set; }
+
+        /// <summary>
+        /// List of informations related to files
+        /// </summary>
+        [XmlArray("info")]
+        [XmlArrayItem("file", typeof(XmlCirrusContentInfo))]
+        public ObservableCollection<XmlCirrusContentInfo> CirrusContentInfo { get; set; }
     }
 }

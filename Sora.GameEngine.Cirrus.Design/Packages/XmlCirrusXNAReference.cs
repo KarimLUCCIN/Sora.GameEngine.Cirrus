@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using System.ComponentModel;
 
 namespace Sora.GameEngine.Cirrus.Design.Packages
 {
-    public class XmlCirrusXNAReference : IComparable<XmlCirrusXNAReference>
+    public class XmlCirrusXNAReference : IComparable<XmlCirrusXNAReference>, INotifyPropertyChanged
     {
         /// <summary>
         /// Assembly path. Can be a gac reference or an assembly relative to the current package directory.
@@ -31,5 +32,34 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
         {
             return "XNA: " + Reference;
         }
+
+        #region INotifyPropertyChanged Members
+
+        private bool valid = true;
+
+        /// <summary>
+        /// Indicates if the reference is valid or not
+        /// </summary>
+        /// <remarks>Used in the designer but not serialized</remarks>
+        [XmlIgnore]
+        public bool Valid
+        {
+            get { return valid; }
+            set
+            {
+                valid = value;
+                RaisePropertyChanged("Valid");
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChanged(string property)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(property));
+        }
+
+        #endregion
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace Sora.GameEngine.Cirrus.Design.Application
 {
@@ -12,24 +13,60 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         public EditorPackageContainerObject(EditorApplication editor)
             : base(editor)
         {
-
+            AvailableXNATypes = new XNAAssemblyDescription[0];
         }
+
+        private XNAAssemblyDescription[] availableXNATypes;
+
+        public XNAAssemblyDescription[] AvailableXNATypes
+        {
+            get { return availableXNATypes; }
+            private set
+            {
+                availableXNATypes = value;
+                RaisePropertyChanged("AvailableXNATypes");
+            }
+        }
+
 
         /// <summary>
         /// Reload the content of the package
         /// </summary>
         public void RefreshContent()
         {
+            AttachPackageEvents();
+
             string baseDirectory = String.IsNullOrEmpty(Editor.CurrentPackagePath)
                 ? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
                 : Path.GetDirectoryName(Editor.CurrentPackagePath);
 
-            Content = new[] { new EditorContentDirectory(Editor, baseDirectory, Editor.Helper.ResolveDirectory(baseDirectory, RootDirectory)) };
+            Content = new object[] { 
+                new EditorXNAReferencesObject(Editor),
+                new EditorPackageReferencesObject(Editor),
+                new EditorContentDirectory(Editor, baseDirectory, Editor.Helper.ResolveDirectory(baseDirectory, RootDirectory)) 
+            };
+
+            AvailableXNATypes = Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences);
         }
 
-        private EditorContentDirectory[] content;
+        private bool packageEventsAttached = false;
+        private void AttachPackageEvents()
+        {
+            if (!packageEventsAttached)
+            {
+                packageEventsAttached = true;
 
-        public EditorContentDirectory[] Content
+                Editor.CurrentPackage.XNAReferences.CollectionChanged += delegate
+                {
+                    AvailableXNATypes = Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences);
+                };
+            }
+        }
+
+        private object[] content;
+
+        [Browsable(false)]
+        public object[] Content
         {
             get { return content; }
             private set
