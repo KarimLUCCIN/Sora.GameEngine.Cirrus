@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows;
 using Sora.GameEngine.Cirrus.Design.Application;
 using Sora.GameEngine.Cirrus.Design.Packages;
+using Sora.GameEngine.Cirrus.UI.EditorBindings;
 
 namespace Sora.GameEngine.Cirrus.UI.Selectors
 {
@@ -70,6 +71,8 @@ namespace Sora.GameEngine.Cirrus.UI.Selectors
                     result = xnaReferenceTemplate;
                 else if (item is XmlCirrusPackageReference)
                     result = packageReferenceTemplate;
+                else if (item is EditorUIContentFile)
+                    result = fileTemplate;
             }
             else
             {

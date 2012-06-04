@@ -1,0 +1,15 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:pe="clr-namespace:System.Activities.Presentation.PropertyEditing;assembly=System.Activities.Presentation">
+    <DataTemplate x:Key="ProcessorInlineEditor">
+        <DockPanel LastChildFill='True'>
+            <pe:EditModeSwitchButton TargetEditMode="ExtendedPopup" 
+                        DockPanel.Dock="Right" />
+            <TextBox Text="{Binding Value.ProcessorValue, Mode=TwoWay}" Margin="2,0,0,0" VerticalAlignment='Center'/>
+        </DockPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ProcessorExtendedEditor">
+        <ComboBox Text="{Binding Value.ProcessorValue, Mode=TwoWay}" ItemsSource="{Binding Value.AvailableProcessors}"/>
+    </DataTemplate>
+</ResourceDictionary>

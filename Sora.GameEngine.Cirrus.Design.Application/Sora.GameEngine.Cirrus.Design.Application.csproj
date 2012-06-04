@@ -48,7 +48,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContentFileProcessorEditor.cs" />
     <Compile Include="EditorApplication.cs" />
     <Compile Include="EditorBaseBoundObject.cs" />
     <Compile Include="EditorContentDirectory.cs" />

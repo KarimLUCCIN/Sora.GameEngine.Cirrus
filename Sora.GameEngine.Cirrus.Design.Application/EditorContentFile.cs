@@ -27,8 +27,6 @@ namespace Sora.GameEngine.Cirrus.Design.Application
 
         private string processor = "";
 
-        [Category("Compiling")]
-        [Editor(typeof(ContentFileProcessorEditor), typeof(System.Activities.Presentation.PropertyEditing.PropertyValueEditor))]
         public string Processor
         {
             get { return processor; }

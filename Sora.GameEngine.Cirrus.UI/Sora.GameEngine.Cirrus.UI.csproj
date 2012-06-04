@@ -71,12 +71,20 @@
     <Compile Include="Controls\MultipleSelectionTreeView.cs" />
     <Compile Include="Controls\MultipleSelectionTreeViewItem.cs" />
     <Compile Include="Controls\WpfPropertyGrid.cs" />
+    <Compile Include="Converters\EditorContentFileToUIContentFileConverter.cs" />
+    <Compile Include="EditorBindings\Editors\CustomEditorProcessors.cs" />
+    <Compile Include="EditorBindings\Editors\CustomProcessorEditorDataEntry.cs" />
     <Compile Include="EditorBindings\EditorUIApplication.cs" />
+    <Compile Include="EditorBindings\EditorUIContentFile.cs" />
     <Compile Include="Selectors\ContentTemplateSelector.cs" />
     <Compile Include="SkinScrollBar\SkinScrollBarResources.cs" />
     <Page Include="Controls\Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EditorBindings\Editors\EditorBindingsCustomEditors.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

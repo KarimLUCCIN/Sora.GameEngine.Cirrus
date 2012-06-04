@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Reflection;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace Sora.GameEngine.Cirrus.Design.Application
 {
@@ -13,12 +14,12 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         public EditorPackageContainerObject(EditorApplication editor)
             : base(editor)
         {
-            AvailableXNATypes = new XNAAssemblyDescription[0];
+            AvailableXNATypes = new ObservableCollection<XNAAssemblyDescription>();
         }
 
-        private XNAAssemblyDescription[] availableXNATypes;
+        private ObservableCollection<XNAAssemblyDescription> availableXNATypes;
 
-        public XNAAssemblyDescription[] AvailableXNATypes
+        public ObservableCollection<XNAAssemblyDescription> AvailableXNATypes
         {
             get { return availableXNATypes; }
             private set
@@ -46,7 +47,16 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                 new EditorContentDirectory(Editor, baseDirectory, Editor.Helper.ResolveDirectory(baseDirectory, RootDirectory)) 
             };
 
-            AvailableXNATypes = Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences);
+            LoadXNATypes(Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences));
+        }
+
+        private void LoadXNATypes(XNAAssemblyDescription[] xnaAssemblies)
+        {
+            AvailableXNATypes.Clear();
+            foreach (var item in xnaAssemblies)
+                AvailableXNATypes.Add(item);
+
+            RaisePropertyChanged("AvailableXNATypes");
         }
 
         private bool packageEventsAttached = false;
@@ -58,7 +68,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
 
                 Editor.CurrentPackage.XNAReferences.CollectionChanged += delegate
                 {
-                    AvailableXNATypes = Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences);
+                    LoadXNATypes(Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences));
                 };
             }
         }

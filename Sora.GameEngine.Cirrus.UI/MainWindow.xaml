@@ -5,8 +5,11 @@
         xmlns:controls="clr-namespace:System.Windows.Controls"
         xmlns:local="clr-namespace:Sora.GameEngine.Cirrus.UI.Controls"
         xmlns:selectors="clr-namespace:Sora.GameEngine.Cirrus.UI.Selectors"
+        xmlns:converters="clr-namespace:Sora.GameEngine.Cirrus.UI.Converters"
         Title="MainWindow" Height="400" Width="525" Background="#FF626262" WindowStartupLocation="CenterScreen">
     <Window.Resources>
+        <converters:EditorContentFileToUIContentFileConverter x:Key="editorUIContentFileConverter"/>
+        
         <HierarchicalDataTemplate x:Key="content_DefaultContainerTemplate" ItemsSource="{Binding Content}">
             <Grid Height="24">
                 <Grid.ColumnDefinitions>
@@ -19,7 +22,7 @@
             </Grid>
         </HierarchicalDataTemplate>
 
-        <HierarchicalDataTemplate x:Key="content_DirectoryTemplate" ItemsSource="{Binding Content}">
+        <HierarchicalDataTemplate x:Key="content_DirectoryTemplate" ItemsSource="{Binding Content, Converter={StaticResource editorUIContentFileConverter}}">
             <Grid Height="24">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="24"/>
