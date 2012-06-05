@@ -12,12 +12,14 @@ namespace Sora.GameEngine.Cirrus.Design
 {
     public class CirrusDesignHelper
     {
-        /// <summary>
-        /// Extention for the attached information file
-        /// </summary>
-        public static string CirrusPropertiesFileExt
+        public static string CirrusPackageExtention
         {
-            get { return ".crinfo"; }
+            get { return ".crpackage"; }
+        }
+
+        public static string CirrusPackageDialogFilter
+        {
+            get { return "Cirrus Package (*.crpackage)|*.crpackage"; }
         }
 
         public IEnumerable<XmlCirrusXNAReference> GetDefaultXNAReferences()
@@ -149,6 +151,52 @@ namespace Sora.GameEngine.Cirrus.Design
                     return false;
                 }
             }
+        }
+        
+        //from http://www.iandevlin.com/blog/2010/01/csharp/generating-a-relative-path-in-csharp
+        public static string RelativePath(string absPath, string relTo)
+        {
+            string[] absDirs = absPath.Split('\\');
+            string[] relDirs = relTo.Split('\\');
+
+            // Get the shortest of the two paths
+            int len = absDirs.Length < relDirs.Length ? absDirs.Length :
+            relDirs.Length;
+
+            // Use to determine where in the loop we exited
+            int lastCommonRoot = -1;
+            int index;
+
+            // Find common root
+            for (index = 0; index < len; index++)
+            {
+                if (absDirs[index] == relDirs[index]) lastCommonRoot = index;
+                else break;
+            }
+
+            // If we didn't find a common prefix then throw
+            if (lastCommonRoot == -1)
+            {
+                throw new ArgumentException("Paths do not have a common base");
+            }
+
+            // Build up the relative path
+            StringBuilder relativePath = new StringBuilder();
+
+            // Add on the ..
+            for (index = lastCommonRoot + 1; index < absDirs.Length; index++)
+            {
+                if (absDirs[index].Length > 0) relativePath.Append("..\\");
+            }
+
+            // Add on the folders
+            for (index = lastCommonRoot + 1; index < relDirs.Length - 1; index++)
+            {
+                relativePath.Append(relDirs[index] + "\\");
+            }
+            relativePath.Append(relDirs[relDirs.Length - 1]);
+
+            return relativePath.ToString();
         }
     }
 }

@@ -51,6 +51,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         }
 
         [Browsable(true)]
+        [Category("Informations")]
         public string RelativePath { get; private set; }
 
         public EditorContentObject(EditorApplication editor, string relativePath, string basePath, string currentPath)

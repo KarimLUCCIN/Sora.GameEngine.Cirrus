@@ -39,7 +39,7 @@ namespace Sora.GameEngine.Cirrus.Design
                 return null;
             else
             {
-                var existingEntry = (from entry in Entries where name.Equals(name) select entry).FirstOrDefault();
+                var existingEntry = (from entry in Entries where name.Equals(entry.Name) select entry).FirstOrDefault();
 
                 if (existingEntry == null && canCreate)
                 {

@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using Sora.GameEngine.Cirrus.Design.Packages;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace Sora.GameEngine.Cirrus.Design.Application
 {
@@ -14,12 +15,38 @@ namespace Sora.GameEngine.Cirrus.Design.Application
 
         public EditorApplication()
         {
+            InitializeNew();
+        }
+
+        public void LoadPackage(string fileName)
+        {
+            using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            {
+                var package = (XmlCirrusPackage)XmlCirrusPackage.Serializer.Deserialize(stream);
+
+                CurrentPackagePath = fileName;
+                CurrentPackage = package;
+
+                Refresh();
+            }
+        }
+
+        public void SavePackage(string fileName)
+        {
+            using (var stream = new FileStream(fileName, FileMode.Create))
+            {
+                XmlCirrusPackage.Serializer.Serialize(stream, CurrentPackage);
+            }
+        }
+
+        public void InitializeNew()
+        {
             InitializeObjects();
 
             currentPackagePath = String.Empty;
             currentPackage = new XmlCirrusPackage();
 
-            InitializeNewPackage();
+            LoadDefaultPackageProperties();
 
             PackageContainer[0].RefreshContent();
         }
@@ -66,7 +93,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         public string CurrentPackagePath
         {
             get { return currentPackagePath; }
-            private set
+            set
             {
                 currentPackagePath = value;
                 RaisePropertyChanged("CurrentPackagePath");
@@ -78,11 +105,22 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         public XmlCirrusPackage CurrentPackage
         {
             get { return currentPackage; }
-            private set
+            set
             {
                 currentPackage = value;
                 RaisePropertyChanged("CurrentPackage");
             }
+        }
+
+        public void Refresh()
+        {
+            SelectionForProperties = new object[0];
+
+            InitializeObjects();
+            PackageContainer[0].RefreshContent();
+
+            RaisePropertyChanged("CurrentPackage");
+            RaisePropertyChanged("PackageContainer");
         }
 
         private EditorPackageContainerObject[] packageContainer;
@@ -102,7 +140,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         /// <summary>
         /// Initialize common properties for a new package
         /// </summary>
-        public void InitializeNewPackage()
+        public void LoadDefaultPackageProperties()
         {
             currentPackage.Name = "Untitled";
             currentPackage.RootDirectory = String.Empty;

@@ -84,5 +84,40 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         {
             return (from xnaType in xnaTypes select xnaType.Importers).SelectMany((lists) => from entry in lists select entry);
         }
+
+        public object GetTypedProperty(string name, Type type, object defaultValue)
+        {
+            try
+            {
+                var info = Editor.CurrentPackage.GetItemDescriptor(RelativePath, false);
+                if (info == null)
+                    return defaultValue;
+                else
+                {
+                    var property = info.GetProperty(name, false);
+                    if (property == null)
+                        return defaultValue;
+                    else
+                    {
+                        if (type.IsEnum)
+                            return Enum.Parse(type, property.Value);
+                        else
+                            return Convert.ChangeType(property.Value, type);
+                    }
+                }
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        public void SetTypedProperty(string name, object value)
+        {
+            var info = Editor.CurrentPackage.GetItemDescriptor(RelativePath, true);
+            var property = info.GetProperty(name, true);
+
+            property.Value = Convert.ToString(value);
+        }
     }
 }

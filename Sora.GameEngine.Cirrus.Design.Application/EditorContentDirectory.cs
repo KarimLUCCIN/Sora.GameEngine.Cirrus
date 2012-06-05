@@ -46,13 +46,54 @@ namespace Sora.GameEngine.Cirrus.Design.Application
 
                     if (directory != null)
                     {
-                        foreach (var sub_dir in directory.GetDirectories())
-                            yield return new EditorContentDirectory(Editor, Path.Combine(RelativePath, sub_dir.Name), BasePath, sub_dir.FullName);
-
-                        foreach (var sub_file in directory.GetFiles())
+                        DirectoryInfo[] dirs = null;
+                        try
                         {
-                            if (!CirrusDesignHelper.CirrusPropertiesFileExt.Equals(sub_file.Extension, StringComparison.OrdinalIgnoreCase))
-                                yield return new EditorContentFile(Editor, Path.Combine(RelativePath, sub_file.Name), BasePath, sub_file.FullName);
+                            dirs = directory.GetDirectories();
+                        }
+                        catch { IsValid = false; }
+
+                        if (dirs != null)
+                        {
+                            foreach (var sub_dir in dirs)
+                            {
+                                EditorContentDirectory contentDir = null;
+                                try
+                                {
+                                    contentDir = new EditorContentDirectory(Editor, Path.Combine(RelativePath, sub_dir.Name), BasePath, sub_dir.FullName);
+                                }
+                                catch { }
+
+                                if (contentDir != null)
+                                    yield return contentDir;
+                            }
+                        }
+
+                        FileInfo[] files = null;
+                        try
+                        {
+                            files = directory.GetFiles();
+                        }
+                        catch { IsValid = false; }
+
+                        if (files != null)
+                        {
+                            foreach (var sub_file in files)
+                            {
+                                if (!CirrusDesignHelper.CirrusPackageExtention.Equals(sub_file.Extension, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    EditorContentFile contentFile = null;
+
+                                    try
+                                    {
+                                        contentFile = new EditorContentFile(Editor, Path.Combine(RelativePath, sub_file.Name), BasePath, sub_file.FullName);
+                                    }
+                                    catch { }
+
+                                    if (contentFile != null)
+                                        yield return contentFile;
+                                }
+                            }
                         }
                     }
                 }
