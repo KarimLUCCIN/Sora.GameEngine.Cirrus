@@ -57,6 +57,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                 EdFile.Processor = processorProperty == null ? null : processorProperty.ProcessorValue;
 
                 RefreshProcessorProperties(true);
+
+                CommitContentInfo();
             };
 
 
@@ -70,6 +72,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             importerProperty.PropertyChanged += delegate
             {
                 EdFile.Importer = importerProperty == null ? null : importerProperty.ImporterValue;
+
+                CommitContentInfo();
             };
 
             /* Processor properties */
@@ -157,26 +161,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             {
                 foreach (var property in selectedProcessor.Properties)
                 {
-                    var descriptor = property.Value;
-
-                    if (descriptor.Type.IsEnum)
-                    {
-                        processorProperties.Properties[property.Key] = new CustomEditorValidatedProperty<object, object>(
-                            descriptor.DefaultValue,
-                            (a) => a,
-                            (b) => b,
-                            (v) => { },
-                            descriptor.Type) { Value = descriptor.DefaultValue };
-                    }
-                    else
-                    {
-                        processorProperties.Properties[property.Key] = new CustomEditorValidatedProperty<object, object>(
-                            descriptor.DefaultValue,
-                            (a) => Convert.ToString(a),
-                            (b) => Convert.ChangeType(b, descriptor.Type),
-                            (v) => { },
-                            descriptor.Type) { Value = descriptor.DefaultValue };
-                    }
+                    CreateDescriptorForProperty(property);
                 }
             }
 
@@ -184,6 +169,39 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
             /* epic cheat */
             EdFile.Editor.RefreshPropertiesView();
+        }
+
+        private void CreateDescriptorForProperty(KeyValuePair<string, XNAContentProcessorPropertyDescriptor> property)
+        {
+            var descriptor = property.Value;
+            var defaultValue = EdFile.GetTypedProperty(property.Key, descriptor.Type, descriptor.DefaultValue);
+
+            if (descriptor.Type.IsEnum)
+            {
+                processorProperties.Properties[property.Key] = new CustomEditorValidatedProperty<object, object>(
+                    defaultValue,
+                    (a) => a,
+                    (b) => b,
+                    (v) =>
+                    {
+                        EdFile.SetTypedProperty(property.Key, v);
+                        CommitContentInfo();
+                    },
+                    descriptor.Type);
+            }
+            else
+            {
+                processorProperties.Properties[property.Key] = new CustomEditorValidatedProperty<object, object>(
+                    descriptor.DefaultValue,
+                    (a) => Convert.ToString(a),
+                    (b) => Convert.ChangeType(b, descriptor.Type),
+                    (v) =>
+                    {
+                        EdFile.SetTypedProperty(property.Key, v);
+                        CommitContentInfo();
+                    },
+                    descriptor.Type);
+            }
         }
         
         #region INotifyPropertyChanged Members

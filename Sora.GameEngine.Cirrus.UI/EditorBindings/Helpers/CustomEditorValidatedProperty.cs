@@ -47,9 +47,6 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
             {
                 baseValue = value;
                 RaisePropertyChanged("BaseValue");
-
-                if (valueChanged != null)
-                    valueChanged(value);
             }
         }
 
@@ -79,6 +76,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
             this.convertToEditor = convertToEditor;
             this.convertToProperty = convertToProperty;
             this.valueChanged = valueChanged;
+
+            value = baseValue;
         }
 
         private TPropertyType value;
@@ -90,6 +89,13 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
             {
                 this.value = value;
                 RaisePropertyChanged("Value");
+
+                try
+                {
+                    if (valueChanged != null)
+                        valueChanged(value);
+                }
+                catch { }
             }
         }
 
