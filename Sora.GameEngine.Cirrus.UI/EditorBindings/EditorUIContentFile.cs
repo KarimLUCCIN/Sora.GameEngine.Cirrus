@@ -120,8 +120,36 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         {
             processorProperties = new DictionaryCustomPropertiesProvider();
 
-            processorProperties.Properties["Test"] = new CustomEditorValidatedProperty<string, string>(Processor.ProcessorValue,
-                (a) => a, (a) => a) { Value = Processor.ProcessorValue };
+            var selectedProcessor = (
+                from processor in Processor.AvailableProcessorsDescriptions
+                where Processor.ProcessorValue == processor.Name
+                select processor
+                    ).FirstOrDefault();
+
+            if (selectedProcessor != null)
+            {
+                foreach (var property in selectedProcessor.Properties)
+                {
+                    var descriptor = property.Value;
+
+                    if (descriptor.Type.IsEnum)
+                    {
+                        processorProperties.Properties[property.Key] = new CustomEditorValidatedProperty<object, object>(
+                            descriptor.DefaultValue,
+                            (a) => a,
+                            (b) => b,
+                            descriptor.Type) { Value = descriptor.DefaultValue };
+                    }
+                    else
+                    {
+                        processorProperties.Properties[property.Key] = new CustomEditorValidatedProperty<object, object>(
+                            descriptor.DefaultValue,
+                            (a) => Convert.ToString(a),
+                            (b) => Convert.ChangeType(b, descriptor.Type),
+                            descriptor.Type) { Value = descriptor.DefaultValue };
+                    }
+                }
+            }
 
             RaisePropertyChanged("ProcessorProperties");
 

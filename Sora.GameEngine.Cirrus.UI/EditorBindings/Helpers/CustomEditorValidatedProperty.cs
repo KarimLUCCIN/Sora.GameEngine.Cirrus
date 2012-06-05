@@ -53,9 +53,10 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
         public CustomEditorValidatedProperty(
             TPropertyType baseValue,
             Func<TPropertyType, TEditorType> convertToEditor,
-            Func<TEditorType, TPropertyType> convertToProperty
+            Func<TEditorType, TPropertyType> convertToProperty,
+            Type editorType = null
             )
-            : base(typeof(TEditorType))
+            : base(editorType == null ? typeof(TEditorType) : editorType)
         {
             if (convertToEditor == null)
                 throw new ArgumentNullException("convertToEditor");
@@ -86,12 +87,26 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
 
         public override void Set(object value)
         {
-            Value = convertToProperty((TEditorType)value);
+            try
+            {
+                Value = convertToProperty((TEditorType)value);
+            }
+            catch
+            {
+                Value = BaseValue;
+            }
         }
 
         public override object Get()
         {
-            return convertToEditor(Value);
+            try
+            {
+                return convertToEditor(Value);
+            }
+            catch
+            {
+                return String.Empty;
+            }
         }
 
         #region INotifyPropertyChanged Members

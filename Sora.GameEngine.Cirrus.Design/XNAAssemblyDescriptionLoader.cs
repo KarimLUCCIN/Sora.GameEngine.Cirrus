@@ -87,6 +87,8 @@ namespace Sora.GameEngine.Cirrus.Design
                                     {
                                         var displayProperty = true;
 
+                                        object defaultValue = null;
+
                                         foreach (var att in property.GetCustomAttributes(true))
                                         {
                                             if (typeof(BrowsableAttribute).IsAssignableFrom(att.GetType()))
@@ -99,11 +101,16 @@ namespace Sora.GameEngine.Cirrus.Design
                                                     break;
                                                 }
                                             }
+                                            else if (typeof(DefaultValueAttribute).IsAssignableFrom(att.GetType()))
+                                            {
+                                                defaultValue = ((DefaultValueAttribute)att).Value;
+                                            }
                                         }
 
                                         if (displayProperty)
                                         {
-                                            processorDescription.Properties[property.Name] = property.PropertyType;
+                                            processorDescription.Properties[property.Name] =
+                                                new XNAContentProcessorPropertyDescriptor() { Type = property.PropertyType, DefaultValue = defaultValue };
                                         }
                                     }
                                 }

@@ -35,6 +35,21 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Editors
             }
         }
 
+        public IEnumerable<XNAContentProcessorDescription> AvailableProcessorsDescriptions
+        {
+            get
+            {
+                if (xnaTypes == null)
+                    yield break;
+
+                foreach (var type in xnaTypes)
+                {
+                    foreach (var processor in type.Processors)
+                        yield return processor;
+                }
+            }
+        }
+
         public IEnumerable<string> AvailableProcessors
         {
             get

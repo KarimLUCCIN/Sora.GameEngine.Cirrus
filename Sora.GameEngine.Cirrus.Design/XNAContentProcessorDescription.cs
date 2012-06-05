@@ -6,11 +6,19 @@ using System.Text;
 namespace Sora.GameEngine.Cirrus.Design
 {
     [Serializable]
+    public class XNAContentProcessorPropertyDescriptor
+    {
+        public Type Type { get; set; }
+     
+        public object DefaultValue { get; set; }
+    }
+
+    [Serializable]
     public class XNAContentProcessorDescription
     {
         public XNAContentProcessorDescription()
         {
-            Properties = new Dictionary<string, Type>();
+            Properties = new Dictionary<string, XNAContentProcessorPropertyDescriptor>();
         }
 
         public string DisplayName { get; set; }
@@ -19,7 +27,7 @@ namespace Sora.GameEngine.Cirrus.Design
 
         public string Name { get; set; }
 
-        public Dictionary<string, Type> Properties { get; private set; }
+        public Dictionary<string, XNAContentProcessorPropertyDescriptor> Properties { get; private set; }
 
         public override string ToString()
         {
