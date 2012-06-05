@@ -5,6 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Content.Pipeline;
+using System.ComponentModel;
 
 namespace Sora.GameEngine.Cirrus.Design
 {
@@ -72,12 +73,42 @@ namespace Sora.GameEngine.Cirrus.Design
                             }
                             else if (isProcessor)
                             {
-                                description.Processors.Add(new XNAContentProcessorDescription()
+                                var processorDescription = new XNAContentProcessorDescription()
                                 {
                                     Name = type.Name,
                                     DisplayName = processorAtt.DisplayName,
                                     TypeId = processorAtt.TypeId
-                                });
+                                };
+
+                                /* Loading available properties */
+                                foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                                {
+                                    if (property.CanWrite && property.CanRead)
+                                    {
+                                        var displayProperty = true;
+
+                                        foreach (var att in property.GetCustomAttributes(true))
+                                        {
+                                            if (typeof(BrowsableAttribute).IsAssignableFrom(att.GetType()))
+                                            {
+                                                var b_att = (BrowsableAttribute)att;
+                                                
+                                                if (!b_att.Browsable)
+                                                {
+                                                    displayProperty = false;
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        if (displayProperty)
+                                        {
+                                            processorDescription.Properties[property.Name] = property.PropertyType;
+                                        }
+                                    }
+                                }
+
+                                description.Processors.Add(processorDescription);
                             }
                         }
 

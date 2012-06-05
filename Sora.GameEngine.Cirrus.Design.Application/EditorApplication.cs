@@ -130,5 +130,13 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         }
 
         #endregion
+
+        public event EventHandler RefreshPropertiesViewRequested;
+
+        public void RefreshPropertiesView()
+        {
+            if (RefreshPropertiesViewRequested != null)
+                RefreshPropertiesViewRequested(this, EventArgs.Empty);
+        }
     }
 }

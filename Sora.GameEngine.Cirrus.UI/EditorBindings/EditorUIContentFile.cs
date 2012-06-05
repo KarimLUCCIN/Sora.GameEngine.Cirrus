@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using Sora.GameEngine.Cirrus.Design.Application;
 using Sora.GameEngine.Cirrus.UI.EditorBindings.Editors;
+using Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {
@@ -16,6 +17,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         public EditorUIContentFile(EditorContentFile file)
         {
             EdFile = file;
+
+            /* Processor */
             processorProperty = new CustomProcessorEditorDataEntry()
             {
                 ProcessorValue = file.Processor,
@@ -25,9 +28,12 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             processorProperty.PropertyChanged += delegate
             {
                 EdFile.Processor = processorProperty == null ? null : processorProperty.ProcessorValue;
+
+                RefreshProcessorProperties(true);
             };
 
 
+            /* Importer */
             importerProperty = new CustomImporterEditorDataEntry()
             {
                 ImporterValue = file.Importer,
@@ -38,6 +44,9 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             {
                 EdFile.Importer = importerProperty == null ? null : importerProperty.ImporterValue;
             };
+
+            /* Processor properties */
+            RefreshProcessorProperties(false);
         }
 
         public string Title
@@ -47,6 +56,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         CustomImporterEditorDataEntry importerProperty;
 
+        [Category("Importer")]
         [Editor(typeof(CustomEditorImporters), typeof(System.Activities.Presentation.PropertyEditing.PropertyValueEditor))]
         public CustomImporterEditorDataEntry Importer
         {
@@ -70,6 +80,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         CustomProcessorEditorDataEntry processorProperty;
 
+        [Category("Processor")]
         [Editor(typeof(CustomEditorProcessors), typeof(System.Activities.Presentation.PropertyEditing.PropertyValueEditor))]
         public CustomProcessorEditorDataEntry Processor
         {
@@ -89,6 +100,33 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
                 RaisePropertyChanged("Processor");
             }
+        }
+
+        private DictionaryCustomPropertiesProvider processorProperties;
+
+        [Category("Processor")]
+        [TypeConverter(typeof(ExpandableObjectConverter))]
+        public DictionaryCustomPropertiesProvider ProcessorProperties
+        {
+            get { return processorProperties; }
+            set
+            {
+                processorProperties = value;
+                RaisePropertyChanged("ProcessorProperties");
+            }
+        }
+
+        public void RefreshProcessorProperties(bool invalidateView)
+        {
+            processorProperties = new DictionaryCustomPropertiesProvider();
+
+            processorProperties.Properties["Test"] = new CustomEditorValidatedProperty<string, string>(Processor.ProcessorValue,
+                (a) => a, (a) => a) { Value = Processor.ProcessorValue };
+
+            RaisePropertyChanged("ProcessorProperties");
+
+            /* epic cheat */
+            EdFile.Editor.RefreshPropertiesView();
         }
         
         #region INotifyPropertyChanged Members

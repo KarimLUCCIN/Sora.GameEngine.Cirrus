@@ -356,10 +356,13 @@ namespace System.Windows.Controls
                         string propName = propEntryValue.GetType().GetProperty("PropertyName").GetValue(propEntryValue, null) as string;
                         title = propEntryValue.GetType().GetProperty("DisplayName").GetValue(propEntryValue, null) as string;
                         PropertyInfo property = theSelectedObjects[0].GetType().GetProperty(propName);
-                        object[] attrs = property.GetCustomAttributes(typeof(DescriptionAttribute), true);
+                        if (property != null)
+                        {
+                            object[] attrs = property.GetCustomAttributes(typeof(DescriptionAttribute), true);
 
-                        if (attrs != null && attrs.Length > 0)
-                            descrip = (attrs[0] as DescriptionAttribute).Description;
+                            if (attrs != null && attrs.Length > 0)
+                                descrip = (attrs[0] as DescriptionAttribute).Description;
+                        }
                     }
                     ChangeHelpText(title, descrip);
                 }

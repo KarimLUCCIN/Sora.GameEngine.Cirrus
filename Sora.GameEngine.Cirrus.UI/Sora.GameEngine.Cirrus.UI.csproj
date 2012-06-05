@@ -76,6 +76,8 @@
     <Compile Include="EditorBindings\Editors\CustomImporterEditorDataEntry.cs" />
     <Compile Include="EditorBindings\Editors\CustomEditorProcessors.cs" />
     <Compile Include="EditorBindings\Editors\CustomProcessorEditorDataEntry.cs" />
+    <Compile Include="EditorBindings\Helpers\CustomEditorValidatedProperty.cs" />
+    <Compile Include="EditorBindings\Helpers\DictionaryCustomPropertiesProvider.cs" />
     <Compile Include="EditorBindings\EditorUIApplication.cs" />
     <Compile Include="EditorBindings\EditorUIContentFile.cs" />
     <Compile Include="Selectors\ContentTemplateSelector.cs" />

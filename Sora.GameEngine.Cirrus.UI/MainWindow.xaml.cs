@@ -27,6 +27,16 @@ namespace Sora.GameEngine.Cirrus.UI
             InitializeComponent();
 
             editorApplication = new EditorUIApplication(this);
+            editorApplication.RefreshPropertiesViewRequested += delegate
+            {
+                var oldSelection = globalPropertyGrid.SelectedObjects;
+                if (oldSelection != null)
+                {
+                    globalPropertyGrid.SelectedObjects = new object[0];
+                    globalPropertyGrid.SelectedObjects = oldSelection;
+                }
+            };
+
             DataContext = editorApplication;
 
             editorApplication.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(editorApplication_PropertyChanged);
