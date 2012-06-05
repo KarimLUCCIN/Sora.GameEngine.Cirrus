@@ -44,7 +44,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             Content = new object[] { 
                 new EditorXNAReferencesObject(Editor),
                 new EditorPackageReferencesObject(Editor),
-                new EditorContentDirectory(Editor, baseDirectory, Editor.Helper.ResolveDirectory(baseDirectory, RootDirectory)) 
+                new EditorContentDirectory(Editor, "", baseDirectory, Editor.Helper.ResolveDirectory(baseDirectory, RootDirectory)) 
             };
 
             LoadXNATypes(Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences));

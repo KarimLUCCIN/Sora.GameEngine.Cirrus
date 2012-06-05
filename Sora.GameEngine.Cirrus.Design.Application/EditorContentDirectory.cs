@@ -10,8 +10,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application
 {
     public class EditorContentDirectory : EditorContentObject
     {        
-        public EditorContentDirectory(EditorApplication editor, string basePath, string currentPath)
-            :base(editor, basePath, currentPath)
+        public EditorContentDirectory(EditorApplication editor, string relativePath, string basePath, string currentPath)
+            :base(editor, relativePath, basePath, currentPath)
         {
             try
             {
@@ -47,12 +47,12 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                     if (directory != null)
                     {
                         foreach (var sub_dir in directory.GetDirectories())
-                            yield return new EditorContentDirectory(Editor, BasePath, sub_dir.FullName);
+                            yield return new EditorContentDirectory(Editor, Path.Combine(RelativePath, sub_dir.Name), BasePath, sub_dir.FullName);
 
                         foreach (var sub_file in directory.GetFiles())
                         {
                             if (!CirrusDesignHelper.CirrusPropertiesFileExt.Equals(sub_file.Extension, StringComparison.OrdinalIgnoreCase))
-                                yield return new EditorContentFile(Editor, BasePath, sub_file.FullName);
+                                yield return new EditorContentFile(Editor, Path.Combine(RelativePath, sub_file.Name), BasePath, sub_file.FullName);
                         }
                     }
                 }

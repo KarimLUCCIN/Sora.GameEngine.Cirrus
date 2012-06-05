@@ -6,6 +6,7 @@ using System.ComponentModel;
 using Sora.GameEngine.Cirrus.Design.Application;
 using Sora.GameEngine.Cirrus.UI.EditorBindings.Editors;
 using Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers;
+using Sora.GameEngine.Cirrus.Design;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {
@@ -13,10 +14,36 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
     {
         [Browsable(false)]
         public EditorContentFile EdFile { get; private set; }
+
+        private XmlCirrusContentInfo contentInfo = null;
+
+        public XmlCirrusContentInfo GetContentInfo(bool canCreate)
+        {
+            return EdFile.Editor.CurrentPackage.GetItemDescriptor(EdFile.RelativePath, canCreate);
+        }
+
+        public void CommitContentInfo()
+        {
+            var info = GetContentInfo(true);
+
+            info.Processor = EdFile.Processor;
+            info.Importer = EdFile.Importer;
+        }
         
         public EditorUIContentFile(EditorContentFile file)
         {
             EdFile = file;
+
+            /* Current properties */
+            var properties = GetContentInfo(false);
+
+            if (properties != null)
+            {
+                file.Processor = properties.Processor;
+                file.Importer = properties.Importer;
+            }
+
+            file.ResolveDefaultProcessorAndImporter();
 
             /* Processor */
             processorProperty = new CustomProcessorEditorDataEntry()
@@ -138,6 +165,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                             descriptor.DefaultValue,
                             (a) => a,
                             (b) => b,
+                            (v) => { },
                             descriptor.Type) { Value = descriptor.DefaultValue };
                     }
                     else
@@ -146,6 +174,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                             descriptor.DefaultValue,
                             (a) => Convert.ToString(a),
                             (b) => Convert.ChangeType(b, descriptor.Type),
+                            (v) => { },
                             descriptor.Type) { Value = descriptor.DefaultValue };
                     }
                 }

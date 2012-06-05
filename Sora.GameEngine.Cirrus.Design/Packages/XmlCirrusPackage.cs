@@ -72,5 +72,29 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
         [XmlArray("info")]
         [XmlArrayItem("file", typeof(XmlCirrusContentInfo))]
         public ObservableCollection<XmlCirrusContentInfo> CirrusContentInfo { get; set; }
+
+        /// <summary>
+        /// Tries to get the description item associated to this path
+        /// </summary>
+        /// <param name="relativePath"></param>
+        /// <param name="canCreate">if false, null is returned if the item doesn't exists. Else, a new item is created with this path</param>
+        /// <returns></returns>
+        public XmlCirrusContentInfo GetItemDescriptor(string relativePath, bool canCreate)
+        {
+            if (relativePath == null)
+                return null;
+            else
+            {
+                var existingItem = (from item in CirrusContentInfo where relativePath.Equals(item.RelativePath, StringComparison.OrdinalIgnoreCase) select item).FirstOrDefault();
+
+                if (existingItem == null && canCreate)
+                {
+                    existingItem = new XmlCirrusContentInfo() { RelativePath = relativePath };
+                    CirrusContentInfo.Add(existingItem);
+                }
+
+                return existingItem;
+            }
+        }
     }
 }

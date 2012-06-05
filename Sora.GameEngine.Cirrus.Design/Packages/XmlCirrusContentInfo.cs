@@ -32,5 +32,23 @@ namespace Sora.GameEngine.Cirrus.Design
         [XmlArray("entries")]
         [XmlArrayItem("property", typeof(XmlCirrusContentInfoEntry))]
         public List<XmlCirrusContentInfoEntry> Entries { get; set; }
+
+        public XmlCirrusContentInfoEntry GetProperty(string name, bool canCreate)
+        {
+            if (name == null)
+                return null;
+            else
+            {
+                var existingEntry = (from entry in Entries where name.Equals(name) select entry).FirstOrDefault();
+
+                if (existingEntry == null && canCreate)
+                {
+                    existingEntry = new XmlCirrusContentInfoEntry() { Name = name, Value = String.Empty };
+                    Entries.Add(existingEntry);
+                }
+
+                return existingEntry;
+            }
+        }
     }
 }

@@ -47,13 +47,25 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
             {
                 baseValue = value;
                 RaisePropertyChanged("BaseValue");
+
+                if (valueChanged != null)
+                    valueChanged(value);
             }
+        }
+
+        private Action<TPropertyType> valueChanged;
+
+        public Action<TPropertyType> ValueChanged
+        {
+            get { return valueChanged; }
+            set { valueChanged = value; }
         }
         
         public CustomEditorValidatedProperty(
             TPropertyType baseValue,
             Func<TPropertyType, TEditorType> convertToEditor,
             Func<TEditorType, TPropertyType> convertToProperty,
+            Action<TPropertyType> valueChanged,
             Type editorType = null
             )
             : base(editorType == null ? typeof(TEditorType) : editorType)
@@ -66,6 +78,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
 
             this.convertToEditor = convertToEditor;
             this.convertToProperty = convertToProperty;
+            this.valueChanged = valueChanged;
         }
 
         private TPropertyType value;

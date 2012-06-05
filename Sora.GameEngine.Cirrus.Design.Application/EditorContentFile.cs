@@ -11,8 +11,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application
 {
     public class EditorContentFile : EditorContentObject
     {
-        public EditorContentFile(EditorApplication editor, string basePath, string currentPath)
-            : base(editor, basePath, currentPath)
+        public EditorContentFile(EditorApplication editor, string relativePath, string basePath, string currentPath)
+            : base(editor, relativePath, basePath, currentPath)
         {
             try
             {
@@ -47,6 +47,42 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                 importer = value;
                 RaisePropertyChanged("Importer");
             }
+        }
+
+        public void ResolveDefaultProcessorAndImporter()
+        {
+            var xnaTypes = Editor.PackageContainer[0].AvailableXNATypes;
+            IEnumerable<XNAContentImporterDescription> xnaImporters = null;
+
+            if (String.IsNullOrEmpty(Importer))
+            {
+                var extention = Path.GetExtension(CurrentPath);
+                if (!String.IsNullOrEmpty(extention))
+                {
+                    xnaImporters = GetImporters(xnaTypes);
+
+                    var defaultImporter = (from importer in xnaImporters where importer.FileExtensions.Contains(extention, StringComparer.OrdinalIgnoreCase) select importer).FirstOrDefault();
+
+                    if (defaultImporter != null)
+                        Importer = defaultImporter.Name;
+                }
+            }
+
+            if (String.IsNullOrEmpty(Processor))
+            {
+                if (xnaImporters == null)
+                xnaImporters = GetImporters(xnaTypes);
+
+                var currentImporter = (from importer in xnaImporters where importer.Name.Equals(Importer) select importer).FirstOrDefault();
+
+                if (currentImporter != null)
+                    Processor = currentImporter.DefaultProcessor;
+            }
+        }
+
+        private static IEnumerable<XNAContentImporterDescription> GetImporters(IEnumerable<XNAAssemblyDescription> xnaTypes)
+        {
+            return (from xnaType in xnaTypes select xnaType.Importers).SelectMany((lists) => from entry in lists select entry);
         }
     }
 }

@@ -49,10 +49,14 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                 RaisePropertyChanged("ErrorString");
             }
         }
-        
-        public EditorContentObject(EditorApplication editor, string basePath, string currentPath)
+
+        [Browsable(true)]
+        public string RelativePath { get; private set; }
+
+        public EditorContentObject(EditorApplication editor, string relativePath, string basePath, string currentPath)
             :base(editor)
         {
+            RelativePath = relativePath;
             BasePath = basePath;
             CurrentPath = currentPath;
         }
