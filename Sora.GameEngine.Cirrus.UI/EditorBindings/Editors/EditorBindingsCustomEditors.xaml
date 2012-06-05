@@ -2,26 +2,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:pe="clr-namespace:System.Activities.Presentation.PropertyEditing;assembly=System.Activities.Presentation">
     <DataTemplate x:Key="ProcessorInlineEditor">
-        <DockPanel LastChildFill='True'>
-            <pe:EditModeSwitchButton TargetEditMode="ExtendedPopup" 
-                        DockPanel.Dock="Right" />
-            <TextBox Text="{Binding Value.ProcessorValue, Mode=TwoWay}" Margin="2,0,0,0" VerticalAlignment='Center'/>
-        </DockPanel>
-    </DataTemplate>
-
-    <DataTemplate x:Key="ProcessorExtendedEditor">
-        <ComboBox Text="{Binding Value.ProcessorValue, Mode=TwoWay}" ItemsSource="{Binding Value.AvailableProcessors}"/>
+        <ComboBox Text="{Binding Value.ProcessorValue, Mode=TwoWay}" ItemsSource="{Binding Value.AvailableProcessors}" IsEditable="True" />
     </DataTemplate>
 
     <DataTemplate x:Key="ImporterInlineEditor">
-        <DockPanel LastChildFill='True'>
-            <pe:EditModeSwitchButton TargetEditMode="ExtendedPopup" 
-                        DockPanel.Dock="Right" />
-            <TextBox Text="{Binding Value.ImporterValue, Mode=TwoWay}" Margin="2,0,0,0" VerticalAlignment='Center'/>
-        </DockPanel>
-    </DataTemplate>
-
-    <DataTemplate x:Key="ImporterExtendedEditor">
-        <ComboBox Text="{Binding Value.ImporterValue, Mode=TwoWay}" ItemsSource="{Binding Value.AvailableImporters}"/>
+        <ComboBox Text="{Binding Value.ImporterValue, Mode=TwoWay}" ItemsSource="{Binding Value.AvailableImporters}" IsEditable="True" />
     </DataTemplate>
 </ResourceDictionary>

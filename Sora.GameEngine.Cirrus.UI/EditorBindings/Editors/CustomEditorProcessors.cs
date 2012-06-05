@@ -15,7 +15,6 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Editors
             dictionary.Source = new Uri("/CirrusUI;component/EditorBindings/Editors/EditorBindingsCustomEditors.xaml", UriKind.Relative);
 
             InlineEditorTemplate = (DataTemplate)dictionary["ProcessorInlineEditor"];
-            ExtendedEditorTemplate = (DataTemplate)dictionary["ProcessorExtendedEditor"];
         }
     }
 }
