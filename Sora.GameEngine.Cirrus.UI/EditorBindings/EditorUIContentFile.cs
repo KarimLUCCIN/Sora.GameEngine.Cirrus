@@ -26,11 +26,46 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             {
                 EdFile.Processor = processorProperty == null ? null : processorProperty.ProcessorValue;
             };
+
+
+            importerProperty = new CustomImporterEditorDataEntry()
+            {
+                ImporterValue = file.Importer,
+                XNATypes = file.Editor.PackageContainer[0].AvailableXNATypes
+            };
+
+            importerProperty.PropertyChanged += delegate
+            {
+                EdFile.Importer = importerProperty == null ? null : importerProperty.ImporterValue;
+            };
         }
 
         public string Title
         {
             get { return EdFile.Title; }
+        }
+
+        CustomImporterEditorDataEntry importerProperty;
+
+        [Editor(typeof(CustomEditorImporters), typeof(System.Activities.Presentation.PropertyEditing.PropertyValueEditor))]
+        public CustomImporterEditorDataEntry Importer
+        {
+            get { return importerProperty; }
+            set
+            {
+                importerProperty = value;
+                EdFile.Importer = importerProperty == null ? null : importerProperty.ImporterValue;
+
+                if (importerProperty != null)
+                {
+                    importerProperty.PropertyChanged += delegate
+                    {
+                        EdFile.Importer = importerProperty == null ? null : importerProperty.ImporterValue;
+                    };
+                }
+
+                RaisePropertyChanged("Importer");
+            }
         }
 
         CustomProcessorEditorDataEntry processorProperty;

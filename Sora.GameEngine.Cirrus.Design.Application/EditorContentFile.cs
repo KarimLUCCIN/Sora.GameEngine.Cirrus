@@ -36,5 +36,17 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                 RaisePropertyChanged("Processor");
             }
         }
+
+        private string importer = "";
+
+        public string Importer
+        {
+            get { return importer; }
+            set
+            {
+                importer = value;
+                RaisePropertyChanged("Importer");
+            }
+        }
     }
 }
