@@ -52,10 +52,33 @@ namespace Sora.GameEngine.Cirrus.UI
             }
         }
 
+        #region UI Layout Saving & Restoring
+
         private void windowDockingManager_Loaded(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                var uiSettingsLocation = editorApplication.UISettingsLocation;
 
+                if (System.IO.File.Exists(uiSettingsLocation))
+                    windowDockingManager.RestoreLayout(uiSettingsLocation);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Impossible de restaurer le layout de l'affichage.\n{0}", ex), "Attention", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            try
+            {
+                windowDockingManager.SaveLayout(editorApplication.UISettingsLocation);
+            }
+            catch { }
+        }
+
+        #endregion
 
         private void packageContentTree_SelectionChanged(object sender, RoutedEventArgs e)
         {

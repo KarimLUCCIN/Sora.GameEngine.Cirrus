@@ -146,5 +146,25 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             return true;
         }
         #endregion
+
+        #region Settings
+        
+        public string UISettingsLocation
+        {
+            get
+            {
+                var settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sora", "Cirrus", "Editor.UI.config.xml");
+                var settingsDirectory = Path.GetDirectoryName(settingsPath);
+
+                var dirInfo = new DirectoryInfo(settingsDirectory);
+
+                if (!dirInfo.Exists)
+                    dirInfo.Create();
+
+                return settingsPath;
+            }
+        }
+
+        #endregion
     }
 }
