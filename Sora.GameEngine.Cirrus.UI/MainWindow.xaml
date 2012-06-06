@@ -124,10 +124,10 @@
                                     </Style>
                                 </StackPanel.Resources>
                                 
-                                <Button Content="Build changed" ToolTip="Build changed items"/>
-                                <Button Content="Build all" ToolTip="Build everything"/>
-                                <Button Content="Rebuild all" ToolTip="Delete built content and rebuild everything"/>
-                                <Button Content="Cancel"/>
+                                <Button Content="Build changed" ToolTip="Build changed items" Command="{Binding Build}"/>
+                                <Button Content="Build all" ToolTip="Build everything" Command="{Binding BuildAll}"/>
+                                <Button Content="Rebuild all" ToolTip="Delete built content and rebuild everything" Command="{Binding RebuildAll}"/>
+                                <Button Content="Cancel" Command="{Binding CancelBuild}"/>
                             </StackPanel>
                         </ad:DockableContent>
                     </ad:DockablePane>
@@ -164,7 +164,16 @@
                         </ad:DockableContent>
 
                         <ad:DockableContent x:Name="debugOutputContent" IsCloseable="False" Title="Output">
-
+                            <ListView ItemsSource="{Binding BuildOutput}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="Order" DisplayMemberBinding="{Binding Order}"/>
+                                        <GridViewColumn Header="Severity" DisplayMemberBinding="{Binding Severity}"/>
+                                        <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Message}"/>
+                                        <GridViewColumn Header="Source" DisplayMemberBinding="{Binding Source}"/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
                         </ad:DockableContent>
                     </ad:DockablePane>
 

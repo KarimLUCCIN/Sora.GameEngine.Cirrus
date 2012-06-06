@@ -12,6 +12,7 @@ using System.IO;
 using Sora.GameEngine.Cirrus.Design.Packages;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
+using System.Windows.Threading;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {
@@ -20,9 +21,13 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         private MainWindow mainWindow;
         private EditorActionsProvider actionsProvider;
 
+        Dispatcher dispatcher;
+
         public EditorUIApplication(MainWindow mainWindow)
         {
             this.mainWindow = mainWindow;
+
+            dispatcher = mainWindow.Dispatcher;
 
             NewFile = new GenericCommand((p) => ActionNewFile(p));
 
@@ -36,16 +41,61 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             About = new GenericCommand((p) => ActionAbout(p));
 
             LoadContextCommands();
+
+            Build = new GenericCommand((p) => { ActionBuild(); }, (p) => CanBuild);
+            BuildAll = new GenericCommand((p) => { ActionBuildAll(); }, (p) => CanBuild);
+            RebuildAll = new GenericCommand((p) => { ActionRebuildAll(); }, (p) => CanBuild);
+            CancelBuild = new GenericCommand((p) => { ActionCancelBuild(); }, (p) => !CanBuild);
         }
+
+        #region Build Commands
+
+        public GenericCommand Build { get; private set; }
+        public GenericCommand BuildAll { get; private set; }
+        public GenericCommand RebuildAll { get; private set; }
+        public GenericCommand CancelBuild { get; private set; }
+
+        private void RefreshBuildCommands()
+        {
+            mainWindow.Dispatcher.Invoke((Action)delegate
+            {
+                Build.Refresh();
+                BuildAll.Refresh();
+                RebuildAll.Refresh();
+                CancelBuild.Refresh();
+            });
+        }
+
+        #endregion
 
         #region Helper
 
+        protected override void Build_Message(string msg, string source = "", BuildMessageSeverity severity = BuildMessageSeverity.Information)
+        {
+            if (dispatcher != null)
+            {
+                dispatcher.Invoke((Action)delegate
+                 {
+                     base.Build_Message(msg, source, severity);
+                 });
+            }
+        }
+
         protected override void RaisePropertyChanged(string property)
         {
-            base.RaisePropertyChanged(property);
+            if (dispatcher != null)
+            {
+                dispatcher.Invoke((Action)delegate
+                 {
+                     base.RaisePropertyChanged(property);
 
-            if (String.IsNullOrEmpty(property) || "CurrentPackagePath".Equals(property))
-                RaisePropertyChanged("Title");
+                     if (String.IsNullOrEmpty(property) || "CurrentPackagePath".Equals(property))
+                         RaisePropertyChanged("Title");
+
+                     if (String.IsNullOrEmpty(property) || "CanBuild".Equals(property))
+                         RefreshBuildCommands();
+                 });
+            }
         }
 
         #endregion
@@ -65,15 +115,23 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         #region Menu
         public bool ActionClose(object parameter = null)
         {
-            switch (MessageBox.Show("Do you want to save your package before closing ?", "Closing", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
+            if (Building)
             {
-                default:
-                case MessageBoxResult.Cancel:
-                    return false;
-                case MessageBoxResult.No:
-                    return true;
-                case MessageBoxResult.Yes:
-                    return ActionSaveFile();
+                MessageBox.Show("A build is in progress. Please wait for it to complete or cancel the build process", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            else
+            {
+                switch (MessageBox.Show("Do you want to save your package before closing ?", "Closing", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
+                {
+                    default:
+                    case MessageBoxResult.Cancel:
+                        return false;
+                    case MessageBoxResult.No:
+                        return true;
+                    case MessageBoxResult.Yes:
+                        return ActionSaveFile();
+                }
             }
         }
 

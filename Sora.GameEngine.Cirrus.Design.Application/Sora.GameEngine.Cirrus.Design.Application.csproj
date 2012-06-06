@@ -48,6 +48,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildMessage.cs" />
+    <Compile Include="BuildMessageSeverity.cs" />
     <Compile Include="EditorApplication.cs" />
     <Compile Include="EditorBaseBoundObject.cs" />
     <Compile Include="EditorContentDirectory.cs" />
@@ -55,6 +57,7 @@
     <Compile Include="EditorContentObject.cs" />
     <Compile Include="EditorPackageReferencesObject.cs" />
     <Compile Include="EditorXNAReferencesObject.cs" />
+    <Compile Include="ExtentionHelpers.cs" />
     <Compile Include="GenericCommand.cs" />
     <Compile Include="EditorPackageContainerObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
