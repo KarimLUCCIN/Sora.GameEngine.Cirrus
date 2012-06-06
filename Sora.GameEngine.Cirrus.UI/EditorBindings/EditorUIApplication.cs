@@ -29,7 +29,33 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             SaveFile = new GenericCommand((p) => ActionSaveFile(p));
 
             Quit = new GenericCommand((p) => ActionQuit(p));
+
+            About = new GenericCommand((p) => ActionAbout(p));
         }
+
+        #region Helper
+
+        protected override void RaisePropertyChanged(string property)
+        {
+            base.RaisePropertyChanged(property);
+
+            if (String.IsNullOrEmpty(property) || "CurrentPackagePath".Equals(property))
+                RaisePropertyChanged("Title");
+        }
+
+        #endregion
+
+        #region Title
+
+        public string Title
+        {
+            get
+            {
+                return String.Format("{0} - Cirrus Package Editor", String.IsNullOrEmpty(CurrentPackagePath) ? "Untitled" : Path.GetFileNameWithoutExtension(CurrentPackagePath));
+            }
+        }
+
+        #endregion
 
         #region Menu
         public bool ActionClose(object parameter = null)
@@ -44,6 +70,13 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                 case MessageBoxResult.Yes:
                     return ActionSaveFile();
             }
+        }
+
+        public GenericCommand About { get; private set; }
+        public void ActionAbout(object parameter = null)
+        {
+            var aboutDlg = new AboutWindow();
+            aboutDlg.ShowDialog();
         }
 
         public GenericCommand NewFile { get; private set; }
