@@ -75,6 +75,7 @@
     <Compile Include="Controls\MultipleSelectionTreeViewItem.cs" />
     <Compile Include="Controls\WpfPropertyGrid.cs" />
     <Compile Include="Converters\EditorContentFileToUIContentFileConverter.cs" />
+    <Compile Include="EditorBindings\EditorActionsProvider.cs" />
     <Compile Include="EditorBindings\Editors\CustomEditorImporters.cs" />
     <Compile Include="EditorBindings\Editors\CustomImporterEditorDataEntry.cs" />
     <Compile Include="EditorBindings\Editors\CustomEditorProcessors.cs" />

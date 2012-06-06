@@ -52,6 +52,8 @@ namespace Sora.GameEngine.Cirrus.UI
             {
                 globalPropertyGrid.SelectedObjects = editorApplication.SelectionForProperties;
                 globalPropertyGrid.RefreshPropertyList();
+
+                editorApplication.RefreshContextCommands();
             }
         }
 
@@ -59,6 +61,11 @@ namespace Sora.GameEngine.Cirrus.UI
         {
             if (!editorApplication.ActionClose(null))
                 e.Cancel = true;
+        }
+
+        private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            editorApplication.RefreshContextCommands();
         }
 
         #endregion
@@ -106,7 +113,11 @@ namespace Sora.GameEngine.Cirrus.UI
 
                 if (treeViewItem != null)
                 {
+                    packageContentTree.UnselectAll();
+
                     treeViewItem.IsSelected = true;
+
+                    editorApplication.SelectionForProperties = new object[] { treeViewItem.DataContext };
 
                     e.Handled = true;
                 }

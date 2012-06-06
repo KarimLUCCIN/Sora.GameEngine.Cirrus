@@ -18,6 +18,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
     public class EditorUIApplication : EditorApplication
     {
         private MainWindow mainWindow;
+        private EditorActionsProvider actionsProvider;
 
         public EditorUIApplication(MainWindow mainWindow)
         {
@@ -226,8 +227,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         private void LoadContextCommands()
         {
-            contextCommands.Add(new GenericCommand(null) { DisplayName = "Add" });
-            contextCommands.Add(new GenericCommand(null) { DisplayName = "Delete" });
+            actionsProvider = new EditorActionsProvider(this);
+            actionsProvider.Load(contextCommands);
         }
 
         private ObservableCollection<GenericCommand> contextCommands = new ObservableCollection<GenericCommand>();
@@ -238,10 +239,12 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             private set { contextCommands = value; }
         }
 
-        public void RefreshCommands()
+        public void RefreshContextCommands()
         {
             foreach (var command in contextCommands)
                 command.Refresh();
+
+            RaisePropertyChanged("ContextCommands");
         }
 
         #endregion

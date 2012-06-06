@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Sora.GameEngine.Cirrus.UI.Controls"
         xmlns:selectors="clr-namespace:Sora.GameEngine.Cirrus.UI.Selectors"
         xmlns:converters="clr-namespace:Sora.GameEngine.Cirrus.UI.Converters"
+        x:Name="mainWindow"
         Title="{Binding Title}" Height="400" Width="525" Background="#FF626262" WindowStartupLocation="CenterScreen" Closed="Window_Closed" Closing="Window_Closing" Icon="/CirrusUI;component/LogoPure.ico">
     <Window.Resources>
         <converters:EditorContentFileToUIContentFileConverter x:Key="editorUIContentFileConverter"/>
@@ -93,12 +94,12 @@
                                            PackageReferenceTemplate="{StaticResource content_Reference_package}"
                                            />
     </Window.Resources>
-    <Grid>
+    <Grid ContextMenuOpening="ContextMenu_ContextMenuOpening">
         <Grid.ContextMenu>
-            <ContextMenu ItemsSource="{Binding ContextCommands}">
+            <ContextMenu ItemsSource="{Binding ContextCommands}" x:Name="gridContextMenu">
                 <ContextMenu.ItemTemplate>
                     <DataTemplate>
-                        <MenuItem Header="{Binding DisplayName}" Command="{Binding}"/>
+                        <MenuItem Header="{Binding DisplayName}" Command="{Binding}" CommandTarget="{Binding ElementName=mainWindow}"/>
                     </DataTemplate>
                 </ContextMenu.ItemTemplate>
             </ContextMenu>
@@ -175,8 +176,8 @@
                 </ad:ResizingPanel>
             </ad:ResizingPanel>
         </ad:DockingManager>
-        
-        <Menu Grid.Row="0">
+
+        <Menu Grid.Row="0" ContextMenuOpening="ContextMenu_ContextMenuOpening">
             <MenuItem Header="File">
                 <MenuItem Header="New" Command="{Binding NewFile}"/>
                 <MenuItem Header="Open" Command="{Binding OpenFile}"/>
@@ -186,7 +187,15 @@
                 <Separator/>
                 <MenuItem Header="Quit" Command="{Binding Quit}"/>
             </MenuItem>
-            
+
+            <MenuItem Header="Edit" ItemsSource="{Binding ContextCommands}">
+                <MenuItem.ItemTemplate>
+                    <DataTemplate>
+                        <MenuItem Header="{Binding DisplayName}" Command="{Binding}" CommandTarget="{Binding ElementName=mainWindow}"/>
+                    </DataTemplate>
+                </MenuItem.ItemTemplate>
+            </MenuItem>
+
             <MenuItem Header="About" Command="{Binding About}">
                 
             </MenuItem>
