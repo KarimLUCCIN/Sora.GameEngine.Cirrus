@@ -94,6 +94,16 @@
                                            />
     </Window.Resources>
     <Grid>
+        <Grid.ContextMenu>
+            <ContextMenu ItemsSource="{Binding ContextCommands}">
+                <ContextMenu.ItemTemplate>
+                    <DataTemplate>
+                        <MenuItem Header="{Binding DisplayName}" Command="{Binding}"/>
+                    </DataTemplate>
+                </ContextMenu.ItemTemplate>
+            </ContextMenu>
+        </Grid.ContextMenu>
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="*" />

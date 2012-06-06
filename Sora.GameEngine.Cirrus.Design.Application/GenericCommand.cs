@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
+using System.ComponentModel;
 
 namespace Sora.GameEngine.Cirrus.Design.Application
 {
     /// <summary>
     /// Generic command class for UI
     /// </summary>
-    public class GenericCommand : ICommand
+    public class GenericCommand : ICommand, INotifyPropertyChanged
     {
         private Action<object> actionCommand;
 
@@ -20,8 +21,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             {
                 actionCommand = value;
 
-                if (CanExecuteChanged != null)
-                    CanExecuteChanged(this, EventArgs.Empty);
+                RaiseCanExecuteChanged();
             }
         }
 
@@ -34,8 +34,19 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             {
                 validateCommand = value;
 
-                if (CanExecuteChanged != null)
-                    CanExecuteChanged(this, EventArgs.Empty);
+                RaiseCanExecuteChanged();
+            }
+        }
+
+        private string displayName;
+
+        public string DisplayName
+        {
+            get { return displayName; }
+            set
+            {
+                displayName = value;
+                RaisePropertyChanged("DisplayName");
             }
         }
 
@@ -68,6 +79,29 @@ namespace Sora.GameEngine.Cirrus.Design.Application
         {
             if (actionCommand != null)
                 actionCommand(parameter);
+        }
+
+        #endregion
+
+        private void RaiseCanExecuteChanged()
+        {
+            if (CanExecuteChanged != null)
+                CanExecuteChanged(this, EventArgs.Empty);
+        }
+
+        public void Refresh()
+        {
+            RaiseCanExecuteChanged();
+        }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void RaisePropertyChanged(string property)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(property));
         }
 
         #endregion

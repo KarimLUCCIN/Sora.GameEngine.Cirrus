@@ -10,6 +10,8 @@ using System.Windows;
 using System.Diagnostics;
 using System.IO;
 using Sora.GameEngine.Cirrus.Design.Packages;
+using System.Windows.Input;
+using System.Collections.ObjectModel;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {
@@ -31,6 +33,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             Quit = new GenericCommand((p) => ActionQuit(p));
 
             About = new GenericCommand((p) => ActionAbout(p));
+
+            LoadContextCommands();
         }
 
         #region Helper
@@ -214,6 +218,30 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
                 return settingsPath;
             }
+        }
+
+        #endregion
+
+        #region Context Commands
+
+        private void LoadContextCommands()
+        {
+            contextCommands.Add(new GenericCommand(null) { DisplayName = "Add" });
+            contextCommands.Add(new GenericCommand(null) { DisplayName = "Delete" });
+        }
+
+        private ObservableCollection<GenericCommand> contextCommands = new ObservableCollection<GenericCommand>();
+
+        public ObservableCollection<GenericCommand> ContextCommands
+        {
+            get { return contextCommands; }
+            private set { contextCommands = value; }
+        }
+
+        public void RefreshCommands()
+        {
+            foreach (var command in contextCommands)
+                command.Refresh();
         }
 
         #endregion

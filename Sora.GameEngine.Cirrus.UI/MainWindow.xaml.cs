@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Sora.GameEngine.Cirrus.UI.EditorBindings;
+using Sora.GameEngine.Cirrus.UI.Controls;
 
 namespace Sora.GameEngine.Cirrus.UI
 {
@@ -43,6 +44,8 @@ namespace Sora.GameEngine.Cirrus.UI
             globalPropertyGrid.SelectedObjects = editorApplication.SelectionForProperties;
         }
 
+        #region Actions Helpers
+
         void editorApplication_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "SelectionForProperties")
@@ -51,6 +54,14 @@ namespace Sora.GameEngine.Cirrus.UI
                 globalPropertyGrid.RefreshPropertyList();
             }
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!editorApplication.ActionClose(null))
+                e.Cancel = true;
+        }
+
+        #endregion
 
         #region UI Layout Saving & Restoring
 
@@ -80,15 +91,36 @@ namespace Sora.GameEngine.Cirrus.UI
 
         #endregion
 
+        #region TreeView Helpers
+
         private void packageContentTree_SelectionChanged(object sender, RoutedEventArgs e)
         {
             editorApplication.SelectionForProperties = (from element in packageContentTree.SelectedItems select element.DataContext).ToArray();
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {
-            if (!editorApplication.ActionClose(null))
-                e.Cancel = true;
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject) as MultipleSelectionTreeViewItem;
+
+                if (treeViewItem != null)
+                {
+                    treeViewItem.IsSelected = true;
+
+                    e.Handled = true;
+                }
+            }
         }
+
+        static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && !(source is TreeViewItem))
+                source = VisualTreeHelper.GetParent(source);
+
+            return source as TreeViewItem;
+        }
+
+        #endregion
     }
 }
