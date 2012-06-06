@@ -32,35 +32,53 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         }
 
         #region Menu
-        public GenericCommand NewFile { get; private set; }
-        public void ActionNewFile(object parameter)
+        public bool ActionClose(object parameter = null)
         {
-            InitializeNew();
+            switch (MessageBox.Show("Do you want to save your package before closing ?", "Closing", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
+            {
+                default:
+                case MessageBoxResult.Cancel:
+                    return false;
+                case MessageBoxResult.No:
+                    return true;
+                case MessageBoxResult.Yes:
+                    return ActionSaveFile();
+            }
+        }
+
+        public GenericCommand NewFile { get; private set; }
+        public void ActionNewFile(object parameter = null)
+        {
+            if (ActionClose())
+                InitializeNew();
         }
 
         public GenericCommand OpenFile { get; private set; }
-        public void ActionOpenFile(object parameter)
+        public void ActionOpenFile(object parameter = null)
         {
-            var ofd = new OpenFileDialog();
-            ofd.Filter = CirrusDesignHelper.CirrusPackageDialogFilter;
-            if (ofd.ShowDialog() == true)
+            if (ActionClose())
             {
-                string fileName = ofd.FileName;
+                var ofd = new OpenFileDialog();
+                ofd.Filter = CirrusDesignHelper.CirrusPackageDialogFilter;
+                if (ofd.ShowDialog() == true)
+                {
+                    string fileName = ofd.FileName;
 
-                try
-                {
-                    LoadPackage(fileName);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    try
+                    {
+                        LoadPackage(fileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex);
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
 
         public GenericCommand SaveFile { get; private set; }
-        public bool ActionSaveFile(object parameter)
+        public bool ActionSaveFile(object parameter = null)
         {
             if (!String.IsNullOrEmpty(CurrentPackagePath))
             {
@@ -75,15 +93,15 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                     Debug.WriteLine(ex);
                     MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
-                    return ActionSaveAsFile(null);
+                    return ActionSaveAsFile();
                 }
             }
             else
-                return ActionSaveAsFile(null);
+                return ActionSaveAsFile();
         }
 
         public GenericCommand SaveAsFile { get; private set; }
-        public bool ActionSaveAsFile(object parameter)
+        public bool ActionSaveAsFile(object parameter = null)
         {
             var sfd = new SaveFileDialog();
             sfd.Filter = CirrusDesignHelper.CirrusPackageDialogFilter;
@@ -121,7 +139,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                 var oldPackagePath = CurrentPackagePath;
 
                 CurrentPackagePath = sfd.FileName;
-                bool succeded = ActionSaveFile(null);
+                bool succeded = ActionSaveFile();
 
                 if (!succeded)
                 {
@@ -140,7 +158,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         }
 
         public GenericCommand Quit { get; private set; }
-        public bool ActionQuit(object parameter)
+        public bool ActionQuit(object parameter = null)
         {
             mainWindow.Close();
             return true;

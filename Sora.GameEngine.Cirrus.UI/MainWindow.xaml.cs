@@ -84,5 +84,11 @@ namespace Sora.GameEngine.Cirrus.UI
         {
             editorApplication.SelectionForProperties = (from element in packageContentTree.SelectedItems select element.DataContext).ToArray();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!editorApplication.ActionClose(null))
+                e.Cancel = true;
+        }
     }
 }
