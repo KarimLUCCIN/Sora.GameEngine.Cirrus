@@ -6,6 +6,7 @@ using Sora.GameEngine.Cirrus.Design.Application;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Diagnostics;
+using Sora.GameEngine.Cirrus.Design.Packages;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {
@@ -23,9 +24,52 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         public void Load(ObservableCollection<GenericCommand> targetCollection)
         {
+            targetCollection.Add(new GenericCommand(AppendXNAReference) { DisplayName = "Append XNA Reference" });
+            targetCollection.Add(new GenericCommand(AppendPackageReference) { DisplayName = "Append Package Reference" });
+
             targetCollection.Add(new GenericCommand(
-               (p) => OpenInWindowsExplorer(editorApplication.SelectionForProperties.First((item) => CanItemBeOpennedInWindowsExplorer(item))),
-                (p) => editorApplication.SelectionForProperties.FirstOrDefault((item) => CanItemBeOpennedInWindowsExplorer(item)) != null) { DisplayName = "Open in Windows Explorer" });
+               (p) => OpenInWindowsExplorer(editorApplication.SelectionForProperties.First((item) => IsItemModifiableWithPropertiesForFileSystem(item))),
+                (p) => editorApplication.SelectionForProperties.FirstOrDefault((item) => IsItemModifiableWithPropertiesForFileSystem(item)) != null) { DisplayName = "Open in Windows Explorer" });
+
+            targetCollection.Add(new GenericCommand(
+                ResetProperties,
+                (prop) => editorApplication.SelectionForProperties.All((item) => IsItemModifiableWithPropertiesForFileSystem(item))) { DisplayName = "Reset Properties" });
+
+            targetCollection.Add(new GenericCommand(
+                DeleteElements,
+                (p) => editorApplication.SelectionForProperties.All((item) => CanDeleteItem(item))) { DisplayName = "Remove Reference" });
+        }
+
+        private void ResetProperties(object p)
+        {
+
+        }
+
+        private bool CanDeleteItem(object item)
+        {
+            return item is XmlCirrusXNAReference
+                || item is XmlCirrusPackageReference;
+        }
+
+        private void DeleteElements(object p)
+        {
+            foreach (var item in editorApplication.SelectionForProperties)
+            {
+                if (item is XmlCirrusXNAReference)
+                    editorApplication.CurrentPackage.XNAReferences.Remove((XmlCirrusXNAReference)item);
+                else if (item is XmlCirrusPackageReference)
+                    editorApplication.CurrentPackage.CirrusReferences.Remove((XmlCirrusPackageReference)item);
+            }
+        }
+
+        private void AppendXNAReference(object p)
+        {
+
+        }
+
+        private void AppendPackageReference(object p)
+        {
+
         }
 
         private void OpenInWindowsExplorer(object p)
@@ -45,7 +89,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                 
         }
 
-        private bool CanItemBeOpennedInWindowsExplorer(object item)
+        private bool IsItemModifiableWithPropertiesForFileSystem(object item)
         {
             return
                 !String.IsNullOrEmpty(editorApplication.CurrentPackagePath) &&

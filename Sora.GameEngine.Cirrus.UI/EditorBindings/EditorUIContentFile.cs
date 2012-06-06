@@ -15,8 +15,6 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         [Browsable(false)]
         public EditorContentFile EdFile { get; private set; }
 
-        private XmlCirrusContentInfo contentInfo = null;
-
         public XmlCirrusContentInfo GetContentInfo(bool canCreate)
         {
             return EdFile.Editor.CurrentPackage.GetItemDescriptor(EdFile.RelativePath, canCreate);
