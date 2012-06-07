@@ -535,6 +535,68 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             }
         }
 
+        private IEnumerable<XNAContentProcessorDescription> AvailableProcessors
+        {
+            get
+            {
+                foreach (var item in cachedReferencesAssemblies)
+                {
+                    foreach (var processor in item.Processors)
+                        yield return processor;
+                }
+            }
+        }
+
+        private IContentProcessor XNAGetProcessorForFile(EditorApplication packageCopy, EditorContentFile file)
+        {
+            var processorName = file.Processor;
+
+            if (String.IsNullOrEmpty(processorName))
+            {
+                Build_Message("Cannot process file because no processor is defined", "GetProcessor", BuildMessageSeverity.Error);
+                throw new FatalBuildErrorException();
+            }
+            else
+            {
+                IContentProcessor result;
+
+                /* First, look in the cache */
+                if (cachedProcessors.TryGetValue(processorName, out result))
+                    return result;
+                else
+                {
+                    /* Then, try finding the descriptor */
+                    var match = (from processor in AvailableProcessors where processor.Name == processorName select processor).ToArray();
+                    if (match == null || match.Length < 1)
+                    {
+                        Build_Message(String.Format("Cannot find an processor matching the name {0}", processorName), "GetProcessor", BuildMessageSeverity.Error);
+                        throw new FatalBuildErrorException();
+                    }
+                    else if (match.Length > 1)
+                    {
+                        Build_Message(String.Format("Several processors found for the name {0}", processorName), "GetProcessor", BuildMessageSeverity.Error);
+                        throw new FatalBuildErrorException();
+                    }
+                    else
+                    {
+                        Build_Message(String.Format("Creating an instance of the processor {0}", processorName), "GetProcessor");
+                        var first_match_type = match.First().Type;
+
+                        var constructor = first_match_type.GetConstructor(new Type[0]);
+                        if (constructor == null)
+                        {
+                            Build_Message("Cannot find a parameterless constructor for the processor", "GetProcessor", BuildMessageSeverity.Error);
+                            throw new FatalBuildErrorException();
+                        }
+                        else
+                        {
+                            return cachedProcessors[processorName] = (IContentProcessor)constructor.Invoke(new object[0]);
+                        }
+                    }
+                }
+            }
+        }
+
         internal BuildLogger XNALogger { get; private set; }
         internal ContentImporterContext XNAContentImporterContext { get; private set; }
         internal ContentProcessorContext XNAContentProcessorContext { get; private set; }

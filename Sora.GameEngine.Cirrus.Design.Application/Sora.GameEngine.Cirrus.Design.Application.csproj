@@ -53,6 +53,7 @@
     <Compile Include="Build\BuildMessage.cs" />
     <Compile Include="Build\BuildMessageSeverity.cs" />
     <Compile Include="Build\CustomContentImporterContext.cs" />
+    <Compile Include="Build\CustomContentProcessorContext.cs" />
     <Compile Include="Editor\EditorApplication.cs" />
     <Compile Include="Editor\EditorBaseBoundObject.cs" />
     <Compile Include="Editor\EditorContentDirectory.cs" />
