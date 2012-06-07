@@ -237,11 +237,12 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             return true;
         }
 
-        private void Build_WrapBuildProcessTaskAsync(Action buildTask)
+        private void Build_WrapBuildProcessTaskAsync(Func<bool> buildTask)
         {
             Building = true;
             CanBuild = false;
             cancellationPending = false;
+            BuildSucceeded = null;
 
             Task.Factory.StartNew(delegate
             {
@@ -250,12 +251,18 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                 {
                     try
                     {
-                        buildTask();
+                        BuildSucceeded = buildTask();
                     }
                     catch (Exception ex)
                     {
                         Build_Message(ex.ToString(), "BuildTask", BuildMessageSeverity.Error);
+                        BuildSucceeded = false;
                     }
+
+                    if (BuildSucceeded == true)
+                        Build_Message("Compilation success", "BuildTask", BuildMessageSeverity.Information);
+                    else
+                        Build_Message("Compilation failed", "BuildTask", BuildMessageSeverity.Error);
                 }
                 finally
                 {
@@ -286,7 +293,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
 
         #region Build Enumerators
 
-        private void Build_ActionForAllFiles(EditorApplication buildPackageApplication, Func<EditorContentFile, bool> action)
+        private bool Build_ActionForAllFiles(EditorApplication buildPackageApplication, Func<EditorContentFile, bool> action)
         {
             if (action != null)
             {
@@ -324,7 +331,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                         if (cancellationPending)
                         {
                             Build_Message("Compilation aborted", "Build_EnumFiles", BuildMessageSeverity.Error);
-                            break;
+                            return false;
                         }
 
                         if (!as_file.IsValid)
@@ -336,7 +343,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                             if (!process_result)
                             {
                                 Build_Message(String.Format("File {0} aborted the compilation", as_file.RelativePath), "Build_EnumFiles", BuildMessageSeverity.Error);
-                                break;
+                                return false;
                             }
                         }
                     }
@@ -344,10 +351,14 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                     if (cancellationPending)
                     {
                         Build_Message("Compilation aborted", "Build_EnumFiles", BuildMessageSeverity.Error);
-                        break;
+                        return false;
                     }
                 }
+
+                return true;
             }
+            else
+                return true;
         }
 
         #endregion
@@ -390,6 +401,17 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             }
         }
 
+        private bool? buildSucceeded;
+
+        public bool? BuildSucceeded
+        {
+            get { return buildSucceeded; }
+            set { buildSucceeded = value;
+            RaisePropertyChanged("BuildSucceeded");
+            }
+        }
+
+
         public void ActionBuild()
         {
             if (CanBuild)
@@ -400,7 +422,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                     var packageCopy = Build_GetPackageCopy();
                     Build_WrapBuildProcessTaskAsync(delegate
                     {
-                        Build_ActionForAllFiles(packageCopy, (file) =>
+                        return Build_ActionForAllFiles(packageCopy, (file) =>
                         {
                             Build_Message(file.RelativePath);
                             return true;
@@ -420,7 +442,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                     var packageCopy = Build_GetPackageCopy();
                     Build_WrapBuildProcessTaskAsync(delegate
                     {
-                        Build_ActionForAllFiles(packageCopy, (file) =>
+                        return Build_ActionForAllFiles(packageCopy, (file) =>
                         {
                             Build_Message(file.RelativePath);
                             return true;
@@ -440,7 +462,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
                     var packageCopy = Build_GetPackageCopy();
                     Build_WrapBuildProcessTaskAsync(delegate
                     {
-                        Build_ActionForAllFiles(packageCopy, (file) =>
+                        return Build_ActionForAllFiles(packageCopy, (file) =>
                         {
                             Build_Message(file.RelativePath);
                             return true;

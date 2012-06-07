@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using Sora.GameEngine.Cirrus.Design.Packages;
 
 namespace Sora.GameEngine.Cirrus.Design
 {
@@ -11,7 +12,7 @@ namespace Sora.GameEngine.Cirrus.Design
         public XmlCirrusContentInfo()
         {
             Entries = new List<XmlCirrusContentInfoEntry>();
-            Compile = true;
+            BuildAction = XmlBuildAction.Compile;
         }
 
         /// <summary>
@@ -20,8 +21,8 @@ namespace Sora.GameEngine.Cirrus.Design
         [XmlAttribute("path")]
         public string RelativePath { get; set; }
 
-        [XmlAttribute("compile")]
-        public bool Compile { get; set; }
+        [XmlAttribute("build")]
+        public XmlBuildAction BuildAction { get; set; }
 
         [XmlAttribute("importer")]
         public string Importer { get; set; }

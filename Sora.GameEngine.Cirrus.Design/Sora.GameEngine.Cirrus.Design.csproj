@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="CirrusDesignHelper.cs" />
     <Compile Include="Isolated.cs" />
+    <Compile Include="Packages\XmlBuildAction.cs" />
     <Compile Include="Packages\XmlCirrusContentInfo.cs" />
     <Compile Include="Packages\XmlCirrusContentInfoEntry.cs" />
     <Compile Include="Packages\XmlCirrusPackage.cs" />

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Diagnostics;
 using System.Activities.Presentation.PropertyEditing;
+using Sora.GameEngine.Cirrus.Design.Packages;
 
 namespace Sora.GameEngine.Cirrus.Design.Application
 {
@@ -22,7 +23,33 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             {
                 ErrorString = ex.ToString();
                 IsValid = false;
+            } 
+            
+            var properties = GetContentInfo(false);
+
+            if (properties != null)
+            {
+                processor = properties.Processor;
+                importer = properties.Importer;
+                buildAction = properties.BuildAction;
             }
+
+            ResolveDefaultProcessorAndImporter();
+
+        }
+
+        public XmlCirrusContentInfo GetContentInfo(bool canCreate)
+        {
+            return Editor.CurrentPackage.GetItemDescriptor(RelativePath, canCreate);
+        }
+
+        public void CommitContentInfo()
+        {
+            var info = GetContentInfo(true);
+
+            info.Processor = Processor;
+            info.Importer = Importer;
+            info.BuildAction = BuildAction;
         }
 
         private string processor = "";
@@ -33,6 +60,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             set
             {
                 processor = value;
+                CommitContentInfo();
                 RaisePropertyChanged("Processor");
             }
         }
@@ -45,39 +73,66 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             set
             {
                 importer = value;
+                CommitContentInfo();
                 RaisePropertyChanged("Importer");
             }
         }
+
+        private XmlBuildAction buildAction = XmlBuildAction.Compile;
+
+        public XmlBuildAction BuildAction
+        {
+            get { return buildAction; }
+            set
+            {
+                buildAction = value;
+                CommitContentInfo();
+                RaisePropertyChanged("BuildAction");
+            }
+        }
+
 
         public void ResolveDefaultProcessorAndImporter()
         {
             var xnaTypes = Editor.PackageContainer[0].AvailableXNATypes;
             IEnumerable<XNAContentImporterDescription> xnaImporters = null;
 
-            if (String.IsNullOrEmpty(Importer))
+            if (String.IsNullOrEmpty(importer))
             {
                 var extention = Path.GetExtension(CurrentPath);
                 if (!String.IsNullOrEmpty(extention))
                 {
                     xnaImporters = GetImporters(xnaTypes);
 
-                    var defaultImporter = (from importer in xnaImporters where importer.FileExtensions.Contains(extention, StringComparer.OrdinalIgnoreCase) select importer).FirstOrDefault();
+                    var defaultImporter = (from importer_obj in xnaImporters where importer_obj.FileExtensions.Contains(extention, StringComparer.OrdinalIgnoreCase) select importer_obj).FirstOrDefault();
 
                     if (defaultImporter != null)
-                        Importer = defaultImporter.Name;
+                        importer = defaultImporter.Name;
                 }
             }
 
-            if (String.IsNullOrEmpty(Processor))
+            if (String.IsNullOrEmpty(processor))
             {
                 if (xnaImporters == null)
-                xnaImporters = GetImporters(xnaTypes);
+                    xnaImporters = GetImporters(xnaTypes);
 
-                var currentImporter = (from importer in xnaImporters where importer.Name.Equals(Importer) select importer).FirstOrDefault();
+                var currentImporter = (from importer_obj in xnaImporters where importer_obj.Name == importer select importer_obj).FirstOrDefault();
 
                 if (currentImporter != null)
-                    Processor = currentImporter.DefaultProcessor;
+                {
+                    /* Special cases */
+                    if (currentImporter.Name == "TextureImporter")
+                        processor = "TextureProcessor";
+                    else
+                    {
+                        /* General case */
+                        processor = currentImporter.DefaultProcessor;
+                    }
+                }
             }
+
+            RaisePropertyChanged("Processor");
+            RaisePropertyChanged("Importer");
         }
 
         private static IEnumerable<XNAContentImporterDescription> GetImporters(IEnumerable<XNAAssemblyDescription> xnaTypes)
@@ -118,6 +173,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application
             var property = info.GetProperty(name, true);
 
             property.Value = Convert.ToString(value);
+
+            CommitContentInfo();
         }
     }
 }
