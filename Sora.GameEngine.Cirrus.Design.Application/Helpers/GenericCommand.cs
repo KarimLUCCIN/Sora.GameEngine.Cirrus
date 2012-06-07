@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Input;
 using System.ComponentModel;
 
-namespace Sora.GameEngine.Cirrus.Design.Application
+namespace Sora.GameEngine.Cirrus.Design.Application.Helpers
 {
     /// <summary>
     /// Generic command class for UI

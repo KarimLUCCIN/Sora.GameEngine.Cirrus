@@ -5,7 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using System.IO;
 
-namespace Sora.GameEngine.Cirrus.Design.Application
+namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
     public class EditorContentObject : EditorBaseBoundObject
     {

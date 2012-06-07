@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using Sora.GameEngine.Cirrus.Design.Packages;
 using System.ComponentModel;
 
-namespace Sora.GameEngine.Cirrus.Design.Application
+namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
     public class EditorPackageReferencesObject : EditorBaseBoundObject
     {

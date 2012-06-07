@@ -68,7 +68,8 @@ namespace Sora.GameEngine.Cirrus.Design
                                     FileExtensions = importerAtt.FileExtensions,
                                     DefaultProcessor = importerAtt.DefaultProcessor,
                                     DisplayName = importerAtt.DisplayName,
-                                    TypeId = importerAtt.TypeId
+                                    TypeId = importerAtt.TypeId,
+                                    Type = type
                                 });
                             }
                             else if (isProcessor)
@@ -77,7 +78,8 @@ namespace Sora.GameEngine.Cirrus.Design
                                 {
                                     Name = type.Name,
                                     DisplayName = processorAtt.DisplayName,
-                                    TypeId = processorAtt.TypeId
+                                    TypeId = processorAtt.TypeId,
+                                    Type = type
                                 };
 
                                 /* Loading available properties */

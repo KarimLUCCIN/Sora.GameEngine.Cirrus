@@ -13,6 +13,8 @@ using Sora.GameEngine.Cirrus.Design.Packages;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
+using Sora.GameEngine.Cirrus.Design.Application.Helpers;
+using Sora.GameEngine.Cirrus.Design.Application.Editor;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {

@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Activities.Presentation.PropertyEditing;
 using Sora.GameEngine.Cirrus.Design.Packages;
 
-namespace Sora.GameEngine.Cirrus.Design.Application
+namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
     public class EditorContentFile : EditorContentObject
     {

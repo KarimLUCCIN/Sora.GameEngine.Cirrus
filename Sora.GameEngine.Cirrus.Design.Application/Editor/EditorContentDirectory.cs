@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Diagnostics;
 
-namespace Sora.GameEngine.Cirrus.Design.Application
+namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
     public class EditorContentDirectory : EditorContentObject
     {        

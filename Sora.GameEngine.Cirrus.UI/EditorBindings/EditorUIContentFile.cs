@@ -8,6 +8,7 @@ using Sora.GameEngine.Cirrus.UI.EditorBindings.Editors;
 using Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers;
 using Sora.GameEngine.Cirrus.Design;
 using Sora.GameEngine.Cirrus.Design.Packages;
+using Sora.GameEngine.Cirrus.Design.Application.Editor;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {

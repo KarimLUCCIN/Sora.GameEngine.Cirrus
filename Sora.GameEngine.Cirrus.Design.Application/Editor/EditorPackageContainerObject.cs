@@ -7,7 +7,7 @@ using System.Reflection;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 
-namespace Sora.GameEngine.Cirrus.Design.Application
+namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
     public class EditorPackageContainerObject : EditorBaseBoundObject
     {

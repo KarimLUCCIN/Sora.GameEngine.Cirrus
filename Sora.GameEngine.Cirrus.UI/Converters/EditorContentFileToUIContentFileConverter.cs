@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Data;
 using Sora.GameEngine.Cirrus.Design.Application;
 using Sora.GameEngine.Cirrus.UI.EditorBindings;
+using Sora.GameEngine.Cirrus.Design.Application.Editor;
 
 namespace Sora.GameEngine.Cirrus.UI.Converters
 {

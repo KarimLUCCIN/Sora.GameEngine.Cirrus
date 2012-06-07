@@ -8,8 +8,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using Sora.GameEngine.Cirrus.Design.Application.Build;
 
-namespace Sora.GameEngine.Cirrus.Design.Application
+namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
     public class EditorApplication : INotifyPropertyChanged
     {

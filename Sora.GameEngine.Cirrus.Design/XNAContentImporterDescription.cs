@@ -22,5 +22,7 @@ namespace Sora.GameEngine.Cirrus.Design
         {
             return "Importer: " + Name;
         }
+
+        public Type Type { get; set; }
     }
 }
