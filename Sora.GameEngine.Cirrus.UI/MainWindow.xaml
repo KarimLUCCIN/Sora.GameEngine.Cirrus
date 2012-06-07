@@ -164,7 +164,7 @@
                         </ad:DockableContent>
 
                         <ad:DockableContent x:Name="debugOutputContent" IsCloseable="False" Title="Output">
-                            <ListView ItemsSource="{Binding BuildOutput}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListView ItemsSource="{Binding Builder.BuildOutput}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <ListView.View>
                                     <GridView>
                                         <GridViewColumn Header="Order" DisplayMemberBinding="{Binding Order}"/>

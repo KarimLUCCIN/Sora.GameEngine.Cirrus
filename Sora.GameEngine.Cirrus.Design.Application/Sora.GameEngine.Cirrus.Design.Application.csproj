@@ -60,6 +60,7 @@
     <Compile Include="ExtentionHelpers.cs" />
     <Compile Include="GenericCommand.cs" />
     <Compile Include="EditorPackageContainerObject.cs" />
+    <Compile Include="PackageBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

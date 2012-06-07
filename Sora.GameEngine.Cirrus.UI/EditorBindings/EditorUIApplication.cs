@@ -42,10 +42,20 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
             LoadContextCommands();
 
-            Build = new GenericCommand((p) => { ActionBuild(); }, (p) => CanBuild);
-            BuildAll = new GenericCommand((p) => { ActionBuildAll(); }, (p) => CanBuild);
-            RebuildAll = new GenericCommand((p) => { ActionRebuildAll(); }, (p) => CanBuild);
-            CancelBuild = new GenericCommand((p) => { ActionCancelBuild(); }, (p) => !CanBuild);
+            Builder.PropertyChanged += new PropertyChangedEventHandler(Builder_PropertyChanged);
+
+            Build = new GenericCommand((p) => { Builder.ActionBuild(); }, (p) => Builder.CanBuild);
+            BuildAll = new GenericCommand((p) => { Builder.ActionBuildAll(); }, (p) => Builder.CanBuild);
+            RebuildAll = new GenericCommand((p) => { Builder.ActionRebuildAll(); }, (p) => Builder.CanBuild);
+            CancelBuild = new GenericCommand((p) => { Builder.ActionCancelBuild(); }, (p) => !Builder.CanBuild);
+        }
+
+        void Builder_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var property = e.PropertyName;
+
+            if (String.IsNullOrEmpty(property) || "CanBuild".Equals(property))
+                RefreshBuildCommands();
         }
 
         #region Build Commands
@@ -70,14 +80,11 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         #region Helper
 
-        protected override void Build_Message(string msg, string source = "", BuildMessageSeverity severity = BuildMessageSeverity.Information)
+        public override void WrapAsyncAction(Action action)
         {
-            if (dispatcher != null)
+            if (action != null && dispatcher != null)
             {
-                dispatcher.Invoke((Action)delegate
-                 {
-                     base.Build_Message(msg, source, severity);
-                 });
+                dispatcher.Invoke(action);
             }
         }
 
@@ -91,9 +98,6 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
                      if (String.IsNullOrEmpty(property) || "CurrentPackagePath".Equals(property))
                          RaisePropertyChanged("Title");
-
-                     if (String.IsNullOrEmpty(property) || "CanBuild".Equals(property))
-                         RefreshBuildCommands();
                  });
             }
         }
@@ -115,7 +119,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         #region Menu
         public bool ActionClose(object parameter = null)
         {
-            if (Building)
+            if (Builder.Building)
             {
                 MessageBox.Show("A build is in progress. Please wait for it to complete or cancel the build process", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
