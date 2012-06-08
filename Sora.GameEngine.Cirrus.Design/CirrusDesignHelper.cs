@@ -128,10 +128,19 @@ namespace Sora.GameEngine.Cirrus.Design
                 {
                     XNAAssemblyDescription xnaDescription;
 
-                    using (var isolatedLoadingContext = new Isolated<XNAAssemblyDescriptionLoader>())
-                    {
-                        xnaDescription = isolatedLoadingContext.Value.LoadDescription(reference.Reference);
-                    }
+                    /*
+                     * Using a different AppDomain is beautiful and so on, but there are a lot of problems
+                     * when trying to marshal back editable types for the processors as they are not available
+                     * in the UI context.
+                     * 
+                     * So, we are going the old way, everything in the same AppDomain ...
+                     * */
+                    //using (var isolatedLoadingContext = new Isolated<XNAAssemblyDescriptionLoader>())
+                    //{
+                    //    xnaDescription = isolatedLoadingContext.Value.LoadDescription(reference.Reference);
+                    //}
+                    var referencesLoader = new XNAAssemblyDescriptionLoader();
+                    xnaDescription = referencesLoader.LoadDescription(reference.Reference);
 
                     if (xnaDescription.Valid)
                     {

@@ -20,8 +20,33 @@ namespace Sora.GameEngine.Cirrus.Design
 
         }
 
+        static List<string> searchPaths = new List<string>();
+
+        static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            var assemblyname = args.Name.Split(',')[0];
+
+            foreach (var searchPath in searchPaths)
+            {
+                var assemblyFileName = Path.Combine(searchPath, assemblyname + ".dll");
+
+                if (File.Exists(assemblyFileName))
+                    return Assembly.LoadFrom(assemblyFileName);
+            }
+
+            return null;
+        }
+
+        static XNAAssemblyDescriptionLoader()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+        }
+
         public XNAAssemblyDescription LoadDescription(string referenceName)
         {
+            if (!searchPaths.Contains(Assembly.GetExecutingAssembly().Location))
+                searchPaths.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+
             if (String.IsNullOrEmpty(referenceName))
                 return null;
             else
@@ -31,9 +56,17 @@ namespace Sora.GameEngine.Cirrus.Design
 
                 try
                 {
-                    var assembly = File.Exists(description.ReferenceName) 
-                    ? Assembly.LoadFile(description.ReferenceName)
-                    : Assembly.LoadWithPartialName(description.ReferenceName);
+                    Assembly assembly;
+
+                    if (File.Exists(description.ReferenceName))
+                    {
+                        if (!searchPaths.Contains(Path.GetDirectoryName(description.ReferenceName)))
+                            searchPaths.Add(Path.GetDirectoryName(description.ReferenceName));
+
+                        assembly = Assembly.LoadFrom(description.ReferenceName);
+                    }
+                    else
+                        assembly = Assembly.LoadWithPartialName(description.ReferenceName);
 
                     if (assembly != null)
                     {
@@ -99,7 +132,7 @@ namespace Sora.GameEngine.Cirrus.Design
                                             if (typeof(BrowsableAttribute).IsAssignableFrom(att.GetType()))
                                             {
                                                 var b_att = (BrowsableAttribute)att;
-                                                
+
                                                 if (!b_att.Browsable)
                                                 {
                                                     displayProperty = false;
