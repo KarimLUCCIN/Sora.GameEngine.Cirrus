@@ -105,6 +105,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                 else if (item is XmlCirrusPackageReference)
                     editorApplication.CurrentPackage.CirrusReferences.Remove((XmlCirrusPackageReference)item);
             }
+
+            editorApplication.Refresh();
         }
 
         private void OpenInWindowsExplorer(object p)
@@ -188,6 +190,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                             xnaReferences.Add(new XmlCirrusXNAReference() { Valid = true, Reference = referencePath });
                         }
                     }
+
+                    editorApplication.Refresh();
                 }
             }
         }

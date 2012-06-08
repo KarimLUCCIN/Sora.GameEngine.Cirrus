@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using System.ComponentModel;
+using System.IO;
 
 namespace Sora.GameEngine.Cirrus.Design
 {
@@ -30,11 +31,13 @@ namespace Sora.GameEngine.Cirrus.Design
 
                 try
                 {
-                    var assembly = Assembly.LoadWithPartialName(description.ReferenceName);
+                    var assembly = File.Exists(description.ReferenceName) 
+                    ? Assembly.LoadFile(description.ReferenceName)
+                    : Assembly.LoadWithPartialName(description.ReferenceName);
 
                     if (assembly != null)
                     {
-                        description.ReferenceName = assembly.FullName;
+                        description.ReferenceName = File.Exists(description.ReferenceName) ? description.ReferenceName : assembly.FullName;
 
                         foreach (var type in assembly.GetTypes())
                         {
@@ -69,7 +72,7 @@ namespace Sora.GameEngine.Cirrus.Design
                                     DefaultProcessor = importerAtt.DefaultProcessor,
                                     DisplayName = importerAtt.DisplayName,
                                     TypeId = importerAtt.TypeId,
-                                    Type = type
+                                    TypeName = type.FullName
                                 });
                             }
                             else if (isProcessor)
@@ -79,7 +82,7 @@ namespace Sora.GameEngine.Cirrus.Design
                                     Name = type.Name,
                                     DisplayName = processorAtt.DisplayName,
                                     TypeId = processorAtt.TypeId,
-                                    Type = type
+                                    TypeName = type.FullName
                                 };
 
                                 /* Loading available properties */

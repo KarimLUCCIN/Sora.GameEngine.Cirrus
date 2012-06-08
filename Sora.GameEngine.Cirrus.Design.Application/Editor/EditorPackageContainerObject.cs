@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using Sora.GameEngine.Cirrus.Design.Packages;
 
 namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
@@ -47,7 +48,16 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
                 new EditorContentDirectory(Editor, "", baseDirectory, Editor.Helper.ResolveDirectory(baseDirectory, RootDirectory)) 
             };
 
-            LoadXNATypes(Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences));
+            LoadXNADescriptorsForPackage();
+        }
+
+        private void LoadXNADescriptorsForPackage()
+        {
+            /* resolve references path */
+            var parsedReferences = from xnaReference in Editor.CurrentPackage.XNAReferences select new XmlCirrusXNAReference() { Reference = Editor.Builder.ParseReferencePath(xnaReference.Reference) };
+
+            /* then, load types */
+            LoadXNATypes(Editor.Helper.GetXNAAssembliesDescriptors(parsedReferences));
         }
 
         private void LoadXNATypes(XNAAssemblyDescription[] xnaAssemblies)
@@ -68,7 +78,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 
                 Editor.CurrentPackage.XNAReferences.CollectionChanged += delegate
                 {
-                    LoadXNATypes(Editor.Helper.GetXNAAssembliesDescriptors(Editor.CurrentPackage.XNAReferences));
+                    LoadXNADescriptorsForPackage();
                 };
             }
         }
@@ -83,6 +93,16 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
             {
                 content = value;
                 RaisePropertyChanged("Content");
+            }
+        }
+
+        public string ContentDirectorySuffix
+        {
+            get { return Editor.CurrentPackage.ContentDirectorySuffix; }
+            set
+            {
+                Editor.CurrentPackage.ContentDirectorySuffix = value;
+                RaisePropertyChanged("ContentDirectorySuffix");
             }
         }
 

@@ -511,6 +511,16 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             return contentBaseDirectory;
         }
 
+        private string GetSafeContentDirectorySuffix(EditorApplication packageCopy)
+        {
+            string baseSuffix = packageCopy.CurrentPackage.ContentDirectorySuffix;
+
+            if (String.IsNullOrEmpty(baseSuffix))
+                baseSuffix = "Content";
+
+            return baseSuffix;
+        }
+
         private string GetOutputPathForFile(EditorApplication packageCopy, EditorContentFile file)
         {
             var rootDirectory = Path.GetDirectoryName(packageCopy.CurrentPackagePath);
@@ -519,7 +529,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                 ? packageCopy.CurrentPackage.OutputDirectory
                 : Path.Combine(rootDirectory, packageCopy.CurrentPackage.OutputDirectory);
 
-            outputBaseDirectory += "\\" + CirrusContentManager.OutputDirectorySuffix;
+            outputBaseDirectory += "\\" + GetSafeContentDirectorySuffix(packageCopy);
 
             var outputCompletePath = Path.Combine(outputBaseDirectory, file.RelativePath);
 
@@ -582,7 +592,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
         {
             var outputBaseDirectory = GetOutputBaseDirectory(packageCopy);
 
-            XNAOutputDirectory = Path.Combine(outputBaseDirectory, CirrusContentManager.OutputDirectorySuffix);
+            XNAOutputDirectory = Path.Combine(outputBaseDirectory, GetSafeContentDirectorySuffix(packageCopy));
             XNAIntermediateDirectory = Path.Combine(outputBaseDirectory, "ContentIntermediate");
 
             XNALogger = new BuildLogger(this);

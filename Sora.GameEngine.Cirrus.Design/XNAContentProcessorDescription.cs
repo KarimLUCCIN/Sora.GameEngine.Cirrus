@@ -34,6 +34,6 @@ namespace Sora.GameEngine.Cirrus.Design
             return "Processor: " + Name;
         }
 
-        public Type Type { get; set; }
+        public string TypeName { get; set; }
     }
 }

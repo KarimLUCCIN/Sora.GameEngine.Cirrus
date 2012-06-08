@@ -28,7 +28,11 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
             CirrusContentInfo = new ObservableCollection<XmlCirrusContentInfo>();
 
             CompressContent = true;
+            ContentDirectorySuffix = "Content";
         }
+
+        [XmlAttribute("contentsuffix")]
+        public string ContentDirectorySuffix { get; set; }
 
         [XmlAttribute("name")]
         public string Name { get; set; }

@@ -195,6 +195,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 
             try
             {
+                Helper.InvalidateXNAAssembliesCache();
+
                 SelectionForProperties = new object[0];
 
                 InitializeObjects();
