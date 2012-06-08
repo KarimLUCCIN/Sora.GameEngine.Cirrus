@@ -76,7 +76,7 @@ namespace Sora.GameEngine.Cirrus.UI
         {
             try
             {
-                var uiSettingsLocation = editorApplication.UISettingsLocation;
+                var uiSettingsLocation = editorApplication.UILayoutLocation;
 
                 if (System.IO.File.Exists(uiSettingsLocation))
                     windowDockingManager.RestoreLayout(uiSettingsLocation);
@@ -91,7 +91,7 @@ namespace Sora.GameEngine.Cirrus.UI
         {
             try
             {
-                windowDockingManager.SaveLayout(editorApplication.UISettingsLocation);
+                windowDockingManager.SaveLayout(editorApplication.UILayoutLocation);
             }
             catch { }
         }

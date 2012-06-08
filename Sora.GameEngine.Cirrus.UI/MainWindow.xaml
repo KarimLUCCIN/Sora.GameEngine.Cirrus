@@ -191,6 +191,17 @@
                 <MenuItem Header="New" Command="{Binding NewFile}"/>
                 <MenuItem Header="Open" Command="{Binding OpenFile}"/>
                 <Separator/>
+                <MenuItem x:Name="recentsItemContainer" Header="Open Recent ..." ItemsSource="{Binding Settings.RecentFiles}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                            <Setter Property="Header" Value="{Binding}"/>
+                            <Setter Property="Command" Value="{Binding ElementName=recentsItemContainer, Path=DataContext.OpenRecent}"/>
+                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                            <Setter Property="CommandTarget" Value="{Binding ElementName=mainWindow}"/>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Header="Save" Command="{Binding SaveFile}"/>
                 <MenuItem Header="Save As" Command="{Binding SaveAsFile}"/>
                 <Separator/>

@@ -25,6 +25,13 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         Dispatcher dispatcher;
 
+        private ApplicationSettingsXml settings;
+
+        public ApplicationSettingsXml Settings
+        {
+            get { return settings; }
+        }
+
         public EditorUIApplication(MainWindow mainWindow)
         {
             this.mainWindow = mainWindow;
@@ -49,7 +56,70 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             Build = new GenericCommand((p) => { Builder.ActionBuild(); }, (p) => Builder.CanBuild);
             Rebuild = new GenericCommand((p) => { Builder.ActionRebuildAll(); }, (p) => Builder.CanBuild);
             CancelBuild = new GenericCommand((p) => { Builder.ActionCancelBuild(); }, (p) => !Builder.CanBuild);
+
+            OpenRecent = new GenericCommand(ActionOpenRecent);
+
+            LoadApplicationSettings();
         }
+
+        #region Application Settings
+        public GenericCommand OpenRecent { get; private set; }
+        public void ActionOpenRecent(object paramater)
+        {
+            string recentPath = paramater as string;
+
+            if (!String.IsNullOrEmpty(recentPath))
+            {
+                if (ActionClose())
+                {
+                    UserOpenFile(recentPath);
+                }
+            }
+        }
+
+        public void LoadApplicationSettings()
+        {
+            settings = new ApplicationSettingsXml();
+            try
+            {
+                var settingsFile = UISettingsLocation;
+
+                if (File.Exists(settingsFile))
+                {
+                    using (var stream = new FileStream(settingsFile, FileMode.Open, FileAccess.Read))
+                    {
+                        settings = (ApplicationSettingsXml)ApplicationSettingsXml.Serializer.Deserialize(stream);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex);
+
+                settings = new ApplicationSettingsXml();
+            }
+        }
+
+        public void SaveApplicationSettings()
+        {
+            settings.CapRecents();
+
+            try
+            {
+                var settingsFile = UISettingsLocation;
+
+                using (var stream = new FileStream(settingsFile, FileMode.Create))
+                {
+                    ApplicationSettingsXml.Serializer.Serialize(stream, settings);
+                    stream.Flush();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+        #endregion
 
         void Builder_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -168,16 +238,29 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                 {
                     string fileName = ofd.FileName;
 
-                    try
-                    {
-                        LoadPackage(fileName);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex);
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                    UserOpenFile(fileName);
                 }
+            }
+        }
+
+        public bool UserOpenFile(string fileName)
+        {
+            try
+            {
+                LoadPackage(fileName);
+
+
+                settings.AppendToRecent(fileName);
+                SaveApplicationSettings();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                return false;
             }
         }
 
@@ -188,9 +271,15 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             {
                 try
                 {
-                    SavePackage(CurrentPackagePath);
+                    if (SavePackage(CurrentPackagePath))
+                    {
+                        settings.AppendToRecent(CurrentPackagePath);
+                        SaveApplicationSettings();
 
-                    return true;
+                        return true;
+                    }
+                    else
+                        return false;
                 }
                 catch (Exception ex)
                 {
@@ -270,12 +359,12 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         #endregion
 
         #region Settings
-        
+
         public string UISettingsLocation
         {
             get
             {
-                var settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sora", "Cirrus", "Editor.UI.config.xml");
+                var settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sora", "Cirrus", "Editor.UI.Settings.xml");
                 var settingsDirectory = Path.GetDirectoryName(settingsPath);
 
                 var dirInfo = new DirectoryInfo(settingsDirectory);
@@ -284,6 +373,22 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                     dirInfo.Create();
 
                 return settingsPath;
+            }
+        }
+        
+        public string UILayoutLocation
+        {
+            get
+            {
+                var layoutPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sora", "Cirrus", "Editor.UI.Config.xml");
+                var layoutDirectory = Path.GetDirectoryName(layoutPath);
+
+                var dirInfo = new DirectoryInfo(layoutDirectory);
+
+                if (!dirInfo.Exists)
+                    dirInfo.Create();
+
+                return layoutPath;
             }
         }
 

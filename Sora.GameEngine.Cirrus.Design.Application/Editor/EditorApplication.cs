@@ -74,11 +74,20 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
             return app;
         }
 
-        public void SavePackage(string fileName)
+        public bool SavePackage(string fileName)
         {
-            using (var stream = new FileStream(fileName, FileMode.Create))
+            try
             {
-                SavePackage(stream);
+                using (var stream = new FileStream(fileName, FileMode.Create))
+                {
+                    SavePackage(stream);
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
