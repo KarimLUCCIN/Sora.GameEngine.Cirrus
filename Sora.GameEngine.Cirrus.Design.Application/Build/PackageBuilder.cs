@@ -46,14 +46,21 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
         #region Build Helpers
 
+        private Action<string, string, BuildMessageSeverity> build_message_redirection = null;
+
         protected virtual void Build_Message(string msg, string source = "", BuildMessageSeverity severity = BuildMessageSeverity.Information)
         {
-            Editor.WrapAsyncAction(delegate
+            if (build_message_redirection != null)
+                build_message_redirection(msg, source, severity);
+            else
             {
-                Debug.WriteLine(String.Format("[{0}] {1} -- {2}", severity, msg, source));
+                Editor.WrapAsyncAction(delegate
+                {
+                    Debug.WriteLine(String.Format("[{0}] {1} -- {2}", severity, msg, source));
 
-                BuildOutput.Add(new BuildMessage() { Message = msg, Source = source, Severity = severity, Order = BuildOutput.Count });
-            });
+                    BuildOutput.Add(new BuildMessage() { Message = msg, Source = source, Severity = severity, Order = BuildOutput.Count });
+                });
+            }
         }
 
         internal void InternalBuild_Message(string msg, string source = "", BuildMessageSeverity severity = BuildMessageSeverity.Information)
@@ -307,32 +314,55 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
         #region Helpers
 
-        public string ParseReferencePath(string xnaReference)
+        public string ParseReferencePath(string referenceName)
         {
-            return ParseReferencePath(Editor, xnaReference);
+            return ParseReferencePath(Editor, referenceName);
         }
 
-        private string ParseReferencePath(EditorApplication packageCopy, string xnaReference)
+        private string ParseReferencePath(EditorApplication packageCopy, string referenceName)
         {
             /* check to see if the reference is a local file */
             try
             {
-                var fi = new FileInfo(Path.Combine(Path.GetDirectoryName(packageCopy.CurrentPackagePath), xnaReference));
+                var fi = new FileInfo(Path.Combine(Path.GetDirectoryName(packageCopy.CurrentPackagePath), referenceName));
                 if (fi.Exists)
                     return fi.FullName;
             }
             catch { }
 
             /* nope */
-            return xnaReference;
+            return referenceName;
         }
 
         #endregion
 
         #region Building operations
 
-        private bool Build_Execute(EditorApplication packageCopy, bool rebuild, bool compress)
+        private bool Build_Execute(EditorApplication packageCopy, bool rebuild, bool compress, List<string> callTree = null, List<string> builtPackages = null)
         {
+            /* callTree is used to identify circular references */
+            if (callTree == null)
+                callTree = new List<string>();
+
+            /* builtPackages is used to skip the recompilation of an already processed package reference */
+            if (builtPackages == null)
+                builtPackages = new List<string>();
+
+            callTree.Add(packageCopy.CurrentPackagePath);
+
+            /* first, processes referenced package */
+            foreach (var packageReference in packageCopy.CurrentPackage.CirrusReferences)
+            {
+                if (!String.IsNullOrEmpty(packageReference.Reference))
+                {
+                    var referencePath = ParseReferencePath(packageCopy, packageReference.Reference);
+
+                    if (!ProcessPackageReference(packageCopy, referencePath, rebuild, compress, callTree, builtPackages))
+                        return false;
+                }
+            }
+
+            /* then process the current package*/
             var decodedAssets = new List<XNACirrusAsset>();
 
             bool success = Build_ActionForAllFiles(packageCopy, (file) =>
@@ -359,9 +389,71 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                 {
                     success = Execute(packageCopy, build, decodedAssets);
                 }
+
+                builtPackages.Add(packageCopy.CurrentPackagePath);
             }
 
             return success;
+        }
+
+        private bool Build_Sync_Execute(bool rebuild, bool compress, List<string> callTree, List<string> builtPackages)
+        {
+            var packageCopy = Build_GetPackageCopy();
+            return Build_Execute(packageCopy, rebuild, compress, callTree, builtPackages);
+        }
+
+        private bool ProcessPackageReference(EditorApplication packageCopy, string referencePath, bool rebuild, bool compress, List<string> callTree, List<string> builtPackages)
+        {
+            if (cancellationPending)
+                return false;
+
+            Build_Message(String.Format("--- Begin --- Referenced Package : {0}", referencePath), "PackageReferenceResolve", BuildMessageSeverity.Information);
+
+            if (callTree.Contains(referencePath))
+            {
+                Build_Message("Circular reference identified, aborting", "PackageReferenceResolve", BuildMessageSeverity.Error);
+                return false;
+            }
+            else
+            {
+                if (builtPackages.Contains(referencePath))
+                {
+                    Build_Message("Package already built. Skipping ...", "PackageReferenceResolve", BuildMessageSeverity.Information);
+                    return true;
+                }
+                else
+                {
+                    var newCallTree = new List<string>();
+                    newCallTree.AddRange(callTree);
+
+                    EditorApplication referencedPackage;
+
+                    using (var packageReferenceStream = new FileStream(referencePath, FileMode.Open, FileAccess.Read))
+                    {
+                        referencedPackage = Editor.LoadAndCreatePackageFromStream(packageReferenceStream, referencePath);
+                    }
+
+                    referencedPackage.CurrentPackage.OutputDirectory = GetOutputBaseDirectory(packageCopy);
+                    referencedPackage.Builder.build_message_redirection = (msg, src, severity) =>
+                    {
+                        Build_Message(msg, src, severity);
+                        referencedPackage.Builder.cancellationPending = cancellationPending;
+                    };
+
+                    var success = referencedPackage.Builder.Build_Sync_Execute(rebuild, compress, newCallTree, builtPackages);
+
+                    if (success)
+                    {
+                        Build_Message(String.Format("--- End Success --- Referenced Package : {0}", referencePath), "PackageReferenceResolve", BuildMessageSeverity.Information);
+                        return true;
+                    }
+                    else
+                    {
+                        Build_Message(String.Format("--- End Failed --- Referenced Package : {0}", referencePath), "PackageReferenceResolve", BuildMessageSeverity.Information);
+                        return false;
+                    }
+                }
+            }
         }
 
         private bool Execute(EditorApplication packageCopy, BuildContent build, IList<XNACirrusAsset> sourceAssets)
@@ -488,16 +580,22 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
         private void XNAContextInit(EditorApplication packageCopy)
         {
-            var rootDirectory = Path.GetDirectoryName(packageCopy.CurrentPackagePath);
-
-            var outputBaseDirectory = Path.IsPathRooted(packageCopy.CurrentPackage.OutputDirectory)
-                ? packageCopy.CurrentPackage.OutputDirectory
-                : Path.Combine(rootDirectory, packageCopy.CurrentPackage.OutputDirectory);
+            var outputBaseDirectory = GetOutputBaseDirectory(packageCopy);
 
             XNAOutputDirectory = Path.Combine(outputBaseDirectory, CirrusContentManager.OutputDirectorySuffix);
             XNAIntermediateDirectory = Path.Combine(outputBaseDirectory, "ContentIntermediate");
 
             XNALogger = new BuildLogger(this);
+        }
+
+        private static string GetOutputBaseDirectory(EditorApplication packageCopy)
+        {
+            var rootDirectory = Path.GetDirectoryName(packageCopy.CurrentPackagePath);
+
+            var outputBaseDirectory = Path.IsPathRooted(packageCopy.CurrentPackage.OutputDirectory)
+                ? packageCopy.CurrentPackage.OutputDirectory
+                : Path.Combine(rootDirectory, packageCopy.CurrentPackage.OutputDirectory);
+            return outputBaseDirectory;
         }
 
         private void XNAContextDispose()
