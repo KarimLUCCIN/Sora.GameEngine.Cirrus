@@ -38,6 +38,11 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 
         }
 
+        public void RemoveContentInfo()
+        {
+            Editor.CurrentPackage.RemoveItemDescriptor(RelativePath);
+        }
+
         public XmlCirrusContentInfo GetContentInfo(bool canCreate)
         {
             return Editor.CurrentPackage.GetItemDescriptor(RelativePath, canCreate);

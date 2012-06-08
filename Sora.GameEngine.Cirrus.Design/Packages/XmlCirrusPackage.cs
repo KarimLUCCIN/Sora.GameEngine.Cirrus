@@ -78,6 +78,19 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
         [XmlArrayItem("file", typeof(XmlCirrusContentInfo))]
         public ObservableCollection<XmlCirrusContentInfo> CirrusContentInfo { get; set; }
 
+        public void RemoveItemDescriptor(string relativePath)
+        {
+            if (relativePath != null)
+            {
+                var existingItem = (from item in CirrusContentInfo where relativePath.Equals(item.RelativePath, StringComparison.OrdinalIgnoreCase) select item).FirstOrDefault();
+
+                if (existingItem != null)
+                {
+                    CirrusContentInfo.Remove(existingItem);
+                }
+            }
+        }
+
         /// <summary>
         /// Tries to get the description item associated to this path
         /// </summary>

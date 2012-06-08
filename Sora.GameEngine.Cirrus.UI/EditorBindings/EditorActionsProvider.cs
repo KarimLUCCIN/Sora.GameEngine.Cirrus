@@ -39,12 +39,56 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
             targetCollection.Add(new GenericCommand(
                 DeleteElements,
-                (p) => editorApplication.SelectionForProperties.All((item) => CanDeleteItem(item))) { DisplayName = "Remove Reference" });
+                (p) => editorApplication.SelectionForProperties.All((item) => CanDeleteItem(item))) { DisplayName = "Remove Reference" }); 
+            
+            
+            targetCollection.Add(new GenericCommand(_ => editorApplication.Refresh()) { DisplayName = "Refresh View" });
         }
 
         private void ResetProperties(object p)
         {
+            bool hadDirectory = false;
 
+            foreach (var item in editorApplication.SelectionForProperties)
+            {
+                var contentFile = item as EditorUIContentFile;
+                var contentDirectory = item as EditorContentDirectory;
+
+                if (contentFile != null)
+                {
+                    contentFile.ResetProperties();
+                }
+                else if (contentDirectory != null)
+                {
+                    hadDirectory = true;
+                    ResetPropertiesRecursive(contentDirectory);
+                }
+            }
+
+            if (hadDirectory)
+                editorApplication.Refresh();
+        }
+
+        private void ResetPropertiesRecursive(EditorContentDirectory rootDirectory)
+        {
+            try
+            {
+                foreach (var element in rootDirectory.Content)
+                {
+                    var contentFile = element as EditorContentFile;
+                    var contentDirectory = element as EditorContentDirectory;
+
+                    if (contentFile != null)
+                    {
+                        contentFile.RemoveContentInfo();
+                    }
+                    else if (contentDirectory != null)
+                    {
+                        ResetPropertiesRecursive(contentDirectory);
+                    }
+                }
+            }
+            catch { }
         }
 
         private bool CanDeleteItem(object item)

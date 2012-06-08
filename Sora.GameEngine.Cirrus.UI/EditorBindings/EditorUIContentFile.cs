@@ -21,11 +21,19 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         {
             EdFile = file;
 
+            CreateSpecialProperties();
+
+            /* Processor properties */
+            RefreshProcessorProperties(false);
+        }
+
+        private void CreateSpecialProperties()
+        {
             /* Processor */
             processorProperty = new CustomProcessorEditorDataEntry()
             {
-                ProcessorValue = file.Processor,
-                XNATypes = file.Editor.PackageContainer[0].AvailableXNATypes
+                ProcessorValue = EdFile.Processor,
+                XNATypes = EdFile.Editor.PackageContainer[0].AvailableXNATypes
             };
 
             processorProperty.PropertyChanged += delegate
@@ -39,17 +47,33 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             /* Importer */
             importerProperty = new CustomImporterEditorDataEntry()
             {
-                ImporterValue = file.Importer,
-                XNATypes = file.Editor.PackageContainer[0].AvailableXNATypes
+                ImporterValue = EdFile.Importer,
+                XNATypes = EdFile.Editor.PackageContainer[0].AvailableXNATypes
             };
 
             importerProperty.PropertyChanged += delegate
             {
                 EdFile.Importer = importerProperty == null ? null : importerProperty.ImporterValue;
             };
+        }
 
-            /* Processor properties */
-            RefreshProcessorProperties(false);
+        public void ResetProperties()
+        {
+            BuildAction = XmlBuildAction.Compile;
+            var info = EdFile.GetContentInfo(false);
+            if (info != null)
+                info.Entries.Clear();
+
+            EdFile.Processor = EdFile.Importer = null;
+
+            EdFile.ResolveDefaultProcessorAndImporter();
+
+            CreateSpecialProperties();
+            RefreshProcessorProperties(true);
+
+            RaisePropertyChanged("Processor");
+            RaisePropertyChanged("Importer");
+            RaisePropertyChanged("BuildAction");
         }
 
         public string Title
