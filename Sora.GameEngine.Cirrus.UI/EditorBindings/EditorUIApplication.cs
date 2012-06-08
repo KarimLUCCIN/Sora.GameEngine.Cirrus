@@ -47,8 +47,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             Builder.PropertyChanged += new PropertyChangedEventHandler(Builder_PropertyChanged);
 
             Build = new GenericCommand((p) => { Builder.ActionBuild(); }, (p) => Builder.CanBuild);
-            BuildAll = new GenericCommand((p) => { Builder.ActionBuildAll(); }, (p) => Builder.CanBuild);
-            RebuildAll = new GenericCommand((p) => { Builder.ActionRebuildAll(); }, (p) => Builder.CanBuild);
+            Rebuild = new GenericCommand((p) => { Builder.ActionRebuildAll(); }, (p) => Builder.CanBuild);
             CancelBuild = new GenericCommand((p) => { Builder.ActionCancelBuild(); }, (p) => !Builder.CanBuild);
         }
 
@@ -63,8 +62,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         #region Build Commands
 
         public GenericCommand Build { get; private set; }
-        public GenericCommand BuildAll { get; private set; }
-        public GenericCommand RebuildAll { get; private set; }
+        public GenericCommand Rebuild { get; private set; }
         public GenericCommand CancelBuild { get; private set; }
 
         private void RefreshBuildCommands()
@@ -72,8 +70,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             mainWindow.Dispatcher.Invoke((Action)delegate
             {
                 Build.Refresh();
-                BuildAll.Refresh();
-                RebuildAll.Refresh();
+                Rebuild.Refresh();
                 CancelBuild.Refresh();
             });
         }

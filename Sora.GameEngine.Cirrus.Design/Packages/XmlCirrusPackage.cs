@@ -26,6 +26,8 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
             XNAReferences = new ObservableCollection<XmlCirrusXNAReference>();
             CirrusReferences = new ObservableCollection<XmlCirrusPackageReference>();
             CirrusContentInfo = new ObservableCollection<XmlCirrusContentInfo>();
+
+            CompressContent = true;
         }
 
         [XmlAttribute("name")]
@@ -43,6 +45,9 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
         /// <remarks>The root can be a path relative to this package directory</remarks>
         [XmlAttribute("root")]
         public string RootDirectory { get; set; }
+
+        [XmlAttribute("compress")]
+        public bool CompressContent { get; set; }
 
         /// <summary>
         /// Directory where the built content is placed

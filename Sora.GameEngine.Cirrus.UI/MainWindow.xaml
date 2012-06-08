@@ -125,9 +125,9 @@
                                 </StackPanel.Resources>
                                 
                                 <Button Content="Build changed" ToolTip="Build changed items" Command="{Binding Build}"/>
-                                <Button Content="Build all" ToolTip="Build everything" Command="{Binding BuildAll}"/>
-                                <Button Content="Rebuild all" ToolTip="Delete built content and rebuild everything" Command="{Binding RebuildAll}"/>
+                                <Button Content="Rebuild all" ToolTip="Rebuild everything" Command="{Binding Rebuild}"/>
                                 <Button Content="Cancel" Command="{Binding CancelBuild}"/>
+                                <CheckBox VerticalAlignment="Center" Foreground="White" IsChecked="{Binding CurrentPackage.CompressContent, Mode=TwoWay}" Content="Compress content"/>
                             </StackPanel>
                         </ad:DockableContent>
                     </ad:DockablePane>

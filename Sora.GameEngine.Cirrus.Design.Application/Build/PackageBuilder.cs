@@ -12,6 +12,9 @@ using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using System.Reflection;
 using Sora.GameEngine.Cirrus.Design.Application.Editor;
 using Sora.GameEngine.Cirrus.Design.Application.Helpers;
+using Microsoft.Xna.Framework.Content.Pipeline.Tasks;
+using Microsoft.Build.Utilities;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Sora.GameEngine.Cirrus.Design.Application.Build
 {
@@ -76,14 +79,12 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             cancellationPending = false;
             BuildSucceeded = null;
 
-            Task.Factory.StartNew(delegate
+            System.Threading.Tasks.Task.Factory.StartNew(delegate
             {
                 try
                 {
                     try
                     {
-                        cachedReferencesAssemblies = Editor.Helper.GetXNAAssembliesDescriptors(packageCopy.CurrentPackage.XNAReferences);
-
                         XNAContextInit(packageCopy);
 
                         BuildSucceeded = buildTask();
@@ -109,10 +110,6 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
                     CanBuild = true;
                     Building = false;
-
-                    cachedReferencesAssemblies = null;
-                    cachedProcessors.Clear();
-                    cachedImporters.Clear();
                 }
             });
         }
@@ -269,31 +266,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                     var packageCopy = Build_GetPackageCopy();
                     Build_WrapBuildProcessTaskAsync(packageCopy, delegate
                     {
-                        return Build_ActionForAllFiles(packageCopy, (file) =>
-                        {
-                            Build_ProcessFile(packageCopy, file);
-                            return true;
-                        });
-                    });
-                }
-            }
-        }
-
-        public void ActionBuildAll()
-        {
-            if (CanBuild)
-            {
-                BuildOutput.Clear();
-                if (Build_CheckConditions())
-                {
-                    var packageCopy = Build_GetPackageCopy();
-                    Build_WrapBuildProcessTaskAsync(packageCopy, delegate
-                    {
-                        return Build_ActionForAllFiles(packageCopy, (file) =>
-                        {
-                            Build_ProcessFile(packageCopy, file);
-                            return true;
-                        });
+                        return Build_Execute(packageCopy, false, packageCopy.CurrentPackage.CompressContent);
                     });
                 }
             }
@@ -309,17 +282,13 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                     var packageCopy = Build_GetPackageCopy();
                     Build_WrapBuildProcessTaskAsync(packageCopy, delegate
                     {
-                        return Build_ActionForAllFiles(packageCopy, (file) =>
-                        {
-                            Build_ProcessFile(packageCopy, file);
-                            return true;
-                        });
+                        return Build_Execute(packageCopy, true, packageCopy.CurrentPackage.CompressContent);
                     });
                 }
             }
         }
 
-        bool cancellationPending = false;
+        internal bool cancellationPending = false;
 
         public void ActionCancelBuild()
         {
@@ -386,6 +355,72 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
         #endregion
 
+        private bool Build_Execute(EditorApplication packageCopy, bool rebuild, bool compress)
+        {
+            var decodedAssets = new List<XNACirrusAsset>();
+
+            bool success = Build_ActionForAllFiles(packageCopy, (file) =>
+            {
+                Build_ProcessFile(decodedAssets, packageCopy, file);
+                return true;
+            });
+
+            if (success)
+            {
+                var build = new BuildContent();
+                // BuildEngine is used by TaskLoggingHelper, so an implementation must be provided  
+                //  
+                build.BuildEngine = new BuildEngine(this);
+                build.RebuildAll = rebuild;
+                build.CompressContent = compress;
+                build.TargetProfile = GraphicsProfile.HiDef.ToString();
+                build.BuildConfiguration = "Debug";
+                build.TargetPlatform = TargetPlatform.Windows.ToString();
+
+                build.OutputDirectory = XNAOutputDirectory;
+
+                if (decodedAssets.Count > 0)
+                {
+                    success = Execute(packageCopy, build, decodedAssets);
+                }
+            }
+
+            return success;
+        }
+
+        private bool Execute(EditorApplication packageCopy, BuildContent build, IList<XNACirrusAsset> sourceAssets)
+        {
+            // the RootDirectory must contain the sourceFile to avoid an "%0" from being appended to the   
+            // output file name  
+            //  
+            build.RootDirectory = GetContentBaseDirectory(packageCopy);
+            build.IntermediateDirectory = XNAIntermediateDirectory;
+            build.LoggerRootDirectory = null;
+            build.SourceAssets = (from sourceAsset in sourceAssets select sourceAsset.TaskItem).ToArray();
+
+            for (int i = 0; i < sourceAssets.Count; ++i)
+            {
+                build.SourceAssets[i] = sourceAssets[i].TaskItem;
+            }
+
+            //const string xnaVersion = ", Version=2.0.0.0, PublicKeyToken=6d5c3888ef60e27d";  
+            // TODO: Why is "Culture" required?  
+            //const string xnaVersion = ", Version=3.0.0.0, Culture=neutral, PublicKeyToken=6d5c3888ef60e27d";
+
+            // Don't append .dll??? if loading from the GAC  
+            build.PipelineAssemblies = (from xnaReference in packageCopy.CurrentPackage.XNAReferences select new TaskItem(xnaReference.Reference)).ToArray();
+            
+            try
+            {
+                return build.Execute();
+            }
+            catch (Exception e)
+            {
+                Build_Message(e.Message, e.Source, BuildMessageSeverity.Error);
+                return false;
+            }
+        }
+
         private string GetSourcePathForFile(EditorApplication packageCopy, EditorContentFile file)
         {
             var contentBaseDirectory = GetContentBaseDirectory(packageCopy);
@@ -424,9 +459,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             return normalizedOutputCompletePath;
         }
 
-        private void Build_ProcessFile(EditorApplication packageCopy, EditorContentFile file)
+        private void Build_ProcessFile(List<XNACirrusAsset> decodedAssets, EditorApplication packageCopy, EditorContentFile file)
         {
-#warning TODO file caching depending on the build mode (using hash and so on)
             var src = GetSourcePathForFile(packageCopy, file);
             var dst = GetOutputPathForFile(packageCopy, file);
 
@@ -450,8 +484,9 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                         }
                         else
                         {
-                            Build_Message(String.Format("Compiling {0} to {1}", src, dst), "ProcessFile");
-                            XNAFileCompile(packageCopy, file, src, dst);
+                            //Build_Message(String.Format("Compiling {0} to {1}", src, dst), "ProcessFile");
+                            //XNAFileCompile(packageCopy, file, src, dst);
+                            decodedAssets.Add(new XNACirrusAsset(packageCopy, file));
                         }
                         break;
                     }
@@ -469,137 +504,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             }
         }
 
-        XNAAssemblyDescription[] cachedReferencesAssemblies;
-        Dictionary<string, IContentImporter> cachedImporters = new Dictionary<string, IContentImporter>();
-        Dictionary<string, IContentProcessor> cachedProcessors = new Dictionary<string, IContentProcessor>();
-
-        private IEnumerable<XNAContentImporterDescription> AvailableImporters
-        {
-            get
-            {
-                foreach (var item in cachedReferencesAssemblies)
-                {
-                    foreach (var importer in item.Importers)
-                        yield return importer;
-                }
-            }
-        }
-
-        private IContentImporter XNAGetImporterForFile(EditorApplication packageCopy, EditorContentFile file)
-        {
-            var importerName = file.Importer;
-
-            if (String.IsNullOrEmpty(importerName))
-            {
-                Build_Message("Cannot import file because no importer is defined", "GetImporter", BuildMessageSeverity.Error);
-                throw new FatalBuildErrorException();
-            }
-            else
-            {
-                IContentImporter result;
-
-                /* First, look in the cache */
-                if (cachedImporters.TryGetValue(importerName, out result))
-                    return result;
-                else
-                {
-                    /* Then, try finding the descriptor */
-                    var match = (from importer in AvailableImporters where importer.Name == importerName select importer).ToArray();
-                    if (match == null || match.Length < 1)
-                    {
-                        Build_Message(String.Format("Cannot find an importer matching the name {0}", importerName), "GetImporter", BuildMessageSeverity.Error);
-                        throw new FatalBuildErrorException();
-                    }
-                    else if (match.Length > 1)
-                    {
-                        Build_Message(String.Format("Several importers found for the name {0}", importerName), "GetImporter", BuildMessageSeverity.Error);
-                        throw new FatalBuildErrorException();
-                    }
-                    else
-                    {
-                        Build_Message(String.Format("Creating an instance of the importer {0}", importerName), "GetImporter");
-                        var first_match_type = match.First().Type;
-
-                        var constructor = first_match_type.GetConstructor(new Type[0]);
-                        if (constructor == null)
-                        {
-                            Build_Message("Cannot find a parameterless constructor for the importer", "GetImporter", BuildMessageSeverity.Error);
-                            throw new FatalBuildErrorException();
-                        }
-                        else
-                        {
-                            return cachedImporters[importerName] = (IContentImporter)constructor.Invoke(new object[0]);
-                        }
-                    }
-                }
-            }
-        }
-
-        private IEnumerable<XNAContentProcessorDescription> AvailableProcessors
-        {
-            get
-            {
-                foreach (var item in cachedReferencesAssemblies)
-                {
-                    foreach (var processor in item.Processors)
-                        yield return processor;
-                }
-            }
-        }
-
-        private IContentProcessor XNAGetProcessorForFile(EditorApplication packageCopy, EditorContentFile file)
-        {
-            var processorName = file.Processor;
-
-            if (String.IsNullOrEmpty(processorName))
-            {
-                Build_Message("Cannot process file because no processor is defined", "GetProcessor", BuildMessageSeverity.Error);
-                throw new FatalBuildErrorException();
-            }
-            else
-            {
-                IContentProcessor result;
-
-                /* First, look in the cache */
-                if (cachedProcessors.TryGetValue(processorName, out result))
-                    return result;
-                else
-                {
-                    /* Then, try finding the descriptor */
-                    var match = (from processor in AvailableProcessors where processor.Name == processorName select processor).ToArray();
-                    if (match == null || match.Length < 1)
-                    {
-                        Build_Message(String.Format("Cannot find an processor matching the name {0}", processorName), "GetProcessor", BuildMessageSeverity.Error);
-                        throw new FatalBuildErrorException();
-                    }
-                    else if (match.Length > 1)
-                    {
-                        Build_Message(String.Format("Several processors found for the name {0}", processorName), "GetProcessor", BuildMessageSeverity.Error);
-                        throw new FatalBuildErrorException();
-                    }
-                    else
-                    {
-                        Build_Message(String.Format("Creating an instance of the processor {0}", processorName), "GetProcessor");
-                        var first_match_type = match.First().Type;
-
-                        var constructor = first_match_type.GetConstructor(new Type[0]);
-                        if (constructor == null)
-                        {
-                            Build_Message("Cannot find a parameterless constructor for the processor", "GetProcessor", BuildMessageSeverity.Error);
-                            throw new FatalBuildErrorException();
-                        }
-                        else
-                        {
-                            return cachedProcessors[processorName] = (IContentProcessor)constructor.Invoke(new object[0]);
-                        }
-                    }
-                }
-            }
-        }
-
         internal BuildLogger XNALogger { get; private set; }
-        internal ContentImporterContext XNAContentImporterContext { get; private set; }
-        internal ContentProcessorContext XNAContentProcessorContext { get; private set; }
 
         internal string XNAIntermediateDirectory { get; private set; }
         internal string XNAOutputDirectory { get; private set; }
@@ -616,66 +521,11 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             XNAIntermediateDirectory = Path.Combine(outputBaseDirectory, "ContentIntermediate");
 
             XNALogger = new BuildLogger(this);
-            XNAContentImporterContext = new CustomContentImporterContext(this);
         }
 
         private void XNAContextDispose()
         {
-            XNAContentProcessorContext = null;
-            XNAContentProcessorContext = null;
-            xnaProcessedAbsoluteFilesPath.Clear();
-            xnaPassDetectedDependency.Clear();
-        }
 
-        /// <summary>
-        /// Complete list of processed files by the compilation process
-        /// </summary>
-        private List<string> xnaProcessedAbsoluteFilesPath = new List<string>();
-
-        private List<string> xnaPassDetectedDependency = new List<string>();
-
-        internal void XNAAddDependency(string fileName)
-        {
-            xnaPassDetectedDependency.Add(fileName);
-        }
-
-        private void XNAFileCompile(EditorApplication packageCopy, EditorContentFile file, string src, string dst)
-        {
-            xnaPassDetectedDependency.Clear();
-
-            #region Process File Content
-
-            if (xnaProcessedAbsoluteFilesPath.Contains(src, StringComparer.OrdinalIgnoreCase))
-            {
-                /* already processed */
-                return;
-            }
-            else
-            {
-                xnaProcessedAbsoluteFilesPath.Add(src);
-
-                var importer = XNAGetImporterForFile(packageCopy, file);
-
-                var importedObj = importer.Import(file.CurrentPath, XNAContentImporterContext);
-            }
-
-            #endregion
-
-            #region Process Added Dependencies
-
-            if (xnaPassDetectedDependency.Count > 0)
-            {
-                var dependencyPath = xnaPassDetectedDependency[0];
-
-                var newEditorFileForDependency = new EditorContentFile(Editor, dependencyPath,
-                    GetContentBaseDirectory(packageCopy), Path.Combine(GetContentBaseDirectory(packageCopy), dependencyPath));
-
-                xnaPassDetectedDependency.RemoveAt(0);
-
-                Build_ProcessFile(packageCopy, newEditorFileForDependency);
-            }
-
-            #endregion
         }
 
         #endregion
