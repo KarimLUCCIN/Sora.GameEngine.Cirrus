@@ -21,8 +21,25 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
             return "Package: " + Reference;
         }
 
+        public XmlCirrusPackageReference()
+        {
+            Build = true;
+        }
+
         #region INotifyPropertyChanged Members
 
+        private bool build;
+
+        public bool Build
+        {
+            get { return build; }
+            set
+            {
+                build = value;
+                RaisePropertyChanged("Build");
+            }
+        }
+        
         private bool valid = true;
 
         /// <summary>

@@ -355,10 +355,18 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             {
                 if (!String.IsNullOrEmpty(packageReference.Reference))
                 {
-                    var referencePath = ParseReferencePath(packageCopy, packageReference.Reference);
+                    if (packageReference.Build)
+                    {
+                        var referencePath = ParseReferencePath(packageCopy, packageReference.Reference);
 
-                    if (!ProcessPackageReference(packageCopy, referencePath, rebuild, compress, callTree, builtPackages))
-                        return false;
+                        if (!ProcessPackageReference(packageCopy, referencePath, rebuild, compress, callTree, builtPackages))
+                            return false;
+                    }
+                    else
+                    {
+                        Build_Message(String.Format("--- Ignore --- The package {0} has be ignored because not marked for Build", packageReference.Reference),
+                            "PackageReferenceCondition", BuildMessageSeverity.Information);
+                    }
                 }
             }
 
@@ -387,7 +395,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
                 if (decodedAssets.Count > 0)
                 {
-                    success = Execute(packageCopy, build, decodedAssets);
+                    success = XNA_Build_Execute(packageCopy, build, decodedAssets);
                 }
 
                 builtPackages.Add(packageCopy.CurrentPackagePath);
@@ -399,7 +407,16 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
         private bool Build_Sync_Execute(bool rebuild, bool compress, List<string> callTree, List<string> builtPackages)
         {
             var packageCopy = Build_GetPackageCopy();
-            return Build_Execute(packageCopy, rebuild, compress, callTree, builtPackages);
+
+            XNAContextInit(packageCopy);
+            try
+            {
+                return Build_Execute(packageCopy, rebuild, compress, callTree, builtPackages);
+            }
+            finally
+            {
+                XNAContextDispose();
+            }
         }
 
         private bool ProcessPackageReference(EditorApplication packageCopy, string referencePath, bool rebuild, bool compress, List<string> callTree, List<string> builtPackages)
@@ -456,12 +473,14 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             }
         }
 
-        private bool Execute(EditorApplication packageCopy, BuildContent build, IList<XNACirrusAsset> sourceAssets)
+        private bool XNA_Build_Execute(EditorApplication packageCopy, BuildContent build, IList<XNACirrusAsset> sourceAssets)
         {
             // the RootDirectory must contain the sourceFile to avoid an "%0" from being appended to the   
             // output file name  
             //  
             build.RootDirectory = GetContentBaseDirectory(packageCopy);
+            Environment.CurrentDirectory = build.RootDirectory;
+
             build.IntermediateDirectory = XNAIntermediateDirectory;
             build.LoggerRootDirectory = null;
             build.SourceAssets = (from sourceAsset in sourceAssets select sourceAsset.TaskItem).ToArray();
