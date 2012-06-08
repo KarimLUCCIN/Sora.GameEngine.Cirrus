@@ -305,6 +305,30 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
         #endregion
 
+        #region Helpers
+
+        public string ParseReferencePath(string xnaReference)
+        {
+            return ParseReferencePath(Editor, xnaReference);
+        }
+
+        private string ParseReferencePath(EditorApplication packageCopy, string xnaReference)
+        {
+            /* check to see if the reference is a local file */
+            try
+            {
+                var fi = new FileInfo(Path.Combine(Path.GetDirectoryName(packageCopy.CurrentPackagePath), xnaReference));
+                if (fi.Exists)
+                    return fi.FullName;
+            }
+            catch { }
+
+            /* nope */
+            return xnaReference;
+        }
+
+        #endregion
+
         #region Building operations
 
         private bool Build_Execute(EditorApplication packageCopy, bool rebuild, bool compress)
@@ -360,7 +384,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             //const string xnaVersion = ", Version=3.0.0.0, Culture=neutral, PublicKeyToken=6d5c3888ef60e27d";
 
             // Don't append .dll??? if loading from the GAC  
-            build.PipelineAssemblies = (from xnaReference in packageCopy.CurrentPackage.XNAReferences select new TaskItem(xnaReference.Reference)).ToArray();
+            build.PipelineAssemblies = (from xnaReference in packageCopy.CurrentPackage.XNAReferences select new TaskItem(ParseReferencePath(packageCopy, xnaReference.Reference))).ToArray();
             
             try
             {
@@ -391,6 +415,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             var contentBaseDirectory = Path.IsPathRooted(packageCopy.CurrentPackage.RootDirectory)
                 ? packageCopy.CurrentPackage.RootDirectory
                 : Path.Combine(rootDirectory, packageCopy.CurrentPackage.RootDirectory);
+
             return contentBaseDirectory;
         }
 
