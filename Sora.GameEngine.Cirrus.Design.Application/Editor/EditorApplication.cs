@@ -22,21 +22,36 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
         {
             Builder = new PackageBuilder(this);
 
+            DefaultStatus();
+
             InitializeNew();
+        }
+
+        public void DefaultStatus()
+        {
+            Status = "Ready";
         }
 
         #region Loading and Saving Package
 
         public void LoadPackage(string fileName)
         {
-            using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            Status = String.Format("Loading {0} ...", fileName);
+            try
             {
-                var package = LoadPackage(stream);
+                using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                {
+                    var package = LoadPackage(stream);
 
-                CurrentPackagePath = fileName;
-                CurrentPackage = package;
+                    CurrentPackagePath = fileName;
+                    CurrentPackage = package;
 
-                Refresh();
+                    Refresh();
+                }
+            }
+            finally
+            {
+                DefaultStatus();
             }
         }
 
@@ -76,8 +91,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
         {
             InitializeObjects();
 
-            currentPackagePath = String.Empty;
-            currentPackage = new XmlCirrusPackage();
+            CurrentPackagePath = String.Empty;
+            CurrentPackage = new XmlCirrusPackage();
 
             LoadDefaultPackageProperties();
 
@@ -167,13 +182,22 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 
         public void Refresh()
         {
-            SelectionForProperties = new object[0];
+            Status = "Refreshing ...";
 
-            InitializeObjects();
-            PackageContainer[0].RefreshContent();
+            try
+            {
+                SelectionForProperties = new object[0];
 
-            RaisePropertyChanged("CurrentPackage");
-            RaisePropertyChanged("PackageContainer");
+                InitializeObjects();
+                PackageContainer[0].RefreshContent();
+
+                RaisePropertyChanged("CurrentPackage");
+                RaisePropertyChanged("PackageContainer");
+            }
+            finally
+            {
+                DefaultStatus();
+            }
         }
 
         private EditorPackageContainerObject[] packageContainer;
@@ -210,6 +234,19 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 
         #region Generic UI Helpers
 
+        private string status = "";
+
+        public string Status
+        {
+            get { return status; }
+            set
+            {
+                status = value;
+
+                RaisePropertyChanged("Status");
+            }
+        }
+        
         public event EventHandler RefreshPropertiesViewRequested;
 
         public void RefreshPropertiesView()

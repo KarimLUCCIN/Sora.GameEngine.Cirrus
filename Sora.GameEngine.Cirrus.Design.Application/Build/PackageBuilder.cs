@@ -79,6 +79,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             cancellationPending = false;
             BuildSucceeded = null;
 
+            Editor.Status = "Building ...";
+
             System.Threading.Tasks.Task.Factory.StartNew(delegate
             {
                 try
@@ -110,6 +112,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
                     CanBuild = true;
                     Building = false;
+
+                    Editor.DefaultStatus();
                 }
             });
         }
@@ -293,67 +297,15 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
         public void ActionCancelBuild()
         {
             cancellationPending = true;
+
+            if (Building)
+                Editor.Status = "Cancelling ...";
         }
 
 
         #endregion
 
         #region Building operations
-
-        #region XNA Cheat Sheet
-
-        private static string WriteAsset(string assetname, object target, ContentProcessorContext context, bool compress = true)
-        {
-            var constructors = typeof(ContentCompiler).GetConstructors(
-                                          BindingFlags.NonPublic | BindingFlags.Instance);
-            var compileContent = typeof(ContentCompiler).GetMethod(
-                                           "Compile",
-                                          BindingFlags.NonPublic | BindingFlags.Instance);
-
-            var compiler = constructors[0].Invoke(null) as ContentCompiler;
-            string outputname = CleanPath(context.OutputDirectory + assetname + ".xnb");
-            context.AddOutputFile(outputname);
-
-            var dir = Path.GetDirectoryName(outputname);
-
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            using (var stream = new FileStream(outputname, FileMode.Create))
-            {
-
-                var param = new object[]   
-                    {   
-                        stream,      
-                        target,       
-                        context.TargetPlatform,  
-                        context.TargetProfile, 
-                        compress,
-                        context.OutputDirectory,   
-                        context.OutputDirectory   
-                    };
-
-
-                compileContent.Invoke(compiler, param);
-            }
-
-            return outputname;
-        }
-
-        private static string CleanPath(string p)
-        {
-            if (String.IsNullOrEmpty(p))
-                return String.Empty;
-            else
-            {
-                while (p.IndexOf(@"\\") >= 0)
-                    p = p.Replace(@"\\", @"\");
-
-                return p;
-            }
-        }
-
-        #endregion
 
         private bool Build_Execute(EditorApplication packageCopy, bool rebuild, bool compress)
         {

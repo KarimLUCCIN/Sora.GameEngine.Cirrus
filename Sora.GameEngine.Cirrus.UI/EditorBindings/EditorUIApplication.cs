@@ -91,13 +91,18 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
         {
             if (dispatcher != null)
             {
-                dispatcher.Invoke((Action)delegate
-                 {
-                     base.RaisePropertyChanged(property);
+                if (dispatcher.Thread != System.Threading.Thread.CurrentThread)
+                    dispatcher.BeginInvoke((Action)delegate
+                    {
+                        RaisePropertyChanged(property);
+                    });
+                else
+                {
+                    base.RaisePropertyChanged(property);
 
-                     if (String.IsNullOrEmpty(property) || "CurrentPackagePath".Equals(property))
-                         RaisePropertyChanged("Title");
-                 });
+                    if (String.IsNullOrEmpty(property) || "CurrentPackagePath".Equals(property))
+                        RaisePropertyChanged("Title");
+                }
             }
         }
 

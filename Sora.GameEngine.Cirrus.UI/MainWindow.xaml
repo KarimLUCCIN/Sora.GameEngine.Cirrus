@@ -108,7 +108,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="25" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <ad:DockingManager Grid.Row="1" x:Name="windowDockingManager" Loaded="windowDockingManager_Loaded">
@@ -127,7 +127,7 @@
                                 <Button Content="Build changed" ToolTip="Build changed items" Command="{Binding Build}"/>
                                 <Button Content="Rebuild all" ToolTip="Rebuild everything" Command="{Binding Rebuild}"/>
                                 <Button Content="Cancel" Command="{Binding CancelBuild}"/>
-                                <CheckBox VerticalAlignment="Center" Foreground="White" IsChecked="{Binding CurrentPackage.CompressContent, Mode=TwoWay}" Content="Compress content"/>
+                                <CheckBox Margin="5,0,0,0" VerticalAlignment="Center" Foreground="White" IsChecked="{Binding CurrentPackage.CompressContent, Mode=TwoWay}" Content="Compress content"/>
                             </StackPanel>
                         </ad:DockableContent>
                     </ad:DockablePane>
@@ -209,15 +209,19 @@
                 
             </MenuItem>
         </Menu>
-        
-        <StackPanel Grid.Row="2">
-            <StackPanel.Background>
+
+        <Border Grid.Row="2" VerticalAlignment="Center" >
+            <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                     <GradientStop Color="#FF626262" Offset="0"/>
                     <GradientStop Color="#FF2D2C2C" Offset="1"/>
                     <GradientStop Color="#FF525252" Offset="0.5"/>
                 </LinearGradientBrush>
-            </StackPanel.Background>
-        </StackPanel>
+            </Border.Background>
+            
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <TextBlock Foreground="White" Text="{Binding Status}" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>
