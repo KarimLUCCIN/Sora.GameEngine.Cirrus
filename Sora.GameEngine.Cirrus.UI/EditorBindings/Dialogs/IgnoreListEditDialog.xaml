@@ -12,44 +12,60 @@
     </Window.Resources>
     <Grid Margin="4">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="50*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="4" />
             <RowDefinition Height="50*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         
-        <TextBlock TextWrapping="Wrap" Margin="0,0,0,5">Ignore string used to exclude elements from the package (one Regex per line)</TextBlock>
+        <GridSplitter Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
 
-        <Border Grid.Row="1" BorderThickness="1" BorderBrush="LightGray" CornerRadius="2">
-            <TextBox BorderThickness="0" Margin="2" Text="{Binding LocalIgnoreString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" />
-        </Border>
 
-        <Button x:Name="btnTestQuery" Grid.Row="2" Content="{Binding TestQueryButtonString}" HorizontalAlignment="Left" Click="btnTestQuery_Click" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="50*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Border Grid.Row="3" BorderThickness="1" BorderBrush="LightGray" CornerRadius="2">
-            <ListBox Grid.Row="4" BorderThickness="0" ItemsSource="{Binding TestingResult}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Height="24">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="24"/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,5">Ignore string used to exclude elements from the package (one Regex per line)</TextBlock>
 
-                            <Image Source="/CirrusUI;component/Images/Generic_Document.png" />
-                            <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{Binding RelativePath}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </Border>
+            <Border Grid.Row="1" BorderThickness="1" BorderBrush="LightGray" CornerRadius="2">
+                <TextBox VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" BorderThickness="0" Margin="2" Text="{Binding LocalIgnoreString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" />
+            </Border>
+
+            <Button x:Name="btnTestQuery" Grid.Row="2" Content="{Binding TestQueryButtonString}" HorizontalAlignment="Left" Click="btnTestQuery_Click" />
+        </Grid>
         
-        <Grid Grid.Row="4">
-            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                <Button x:Name="btnOK" Content="OK" Click="btnOK_Click" />
-                <Button x:Name="btnCancel" Content="Cancel" Click="btnCancel_Click" />
-            </StackPanel>
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            
+            <Border Grid.Row="0" BorderThickness="1" BorderBrush="LightGray" CornerRadius="2">
+                <ListBox Grid.Row="4" BorderThickness="0" ItemsSource="{Binding TestingResult}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Height="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+
+                                <Image Source="/CirrusUI;component/Images/Generic_Document.png" />
+                                <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{Binding RelativePath}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button x:Name="btnOK" Content="OK" Click="btnOK_Click" />
+                    <Button x:Name="btnCancel" Content="Cancel" Click="btnCancel_Click" />
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

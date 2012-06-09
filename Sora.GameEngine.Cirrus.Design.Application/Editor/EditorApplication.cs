@@ -9,6 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Sora.GameEngine.Cirrus.Design.Application.Build;
+using System.Text.RegularExpressions;
 
 namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
@@ -195,6 +196,8 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 
             try
             {
+                LoadRegexFilters();
+
                 Helper.InvalidateXNAAssembliesCache();
 
                 SelectionForProperties = new object[0];
@@ -208,6 +211,34 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
             finally
             {
                 DefaultStatus();
+            }
+        }
+
+        /// <summary>
+        /// Regex used to exclude elements from the listing
+        /// </summary>
+        internal Regex[] ignoreRegexFilters = new Regex[0];
+
+        private void LoadRegexFilters()
+        {
+            ignoreRegexFilters = new Regex[0];
+
+            try
+            {
+                var filterString = CurrentPackage.IgnoreString;
+
+                if (!String.IsNullOrEmpty(filterString))
+                {
+                    var parts = filterString.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    ignoreRegexFilters = (from part in parts select new Regex(part, RegexOptions.IgnoreCase)).ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+
+                ignoreRegexFilters = new Regex[0];
             }
         }
 

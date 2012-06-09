@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using System.IO;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
@@ -24,75 +25,147 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
             }
         }
 
+        /// <summary>
+        /// Content of the current directory, considering the ignore filters defined at project level
+        /// </summary>
         public IEnumerable<EditorBaseBoundObject> Content
         {
             get
             {
                 if (IsValid)
                 {
-                    DirectoryInfo directory;
+                    return EnumerateDirectoryContent(Editor.ignoreRegexFilters);
+                }
+                else 
+                    return new EditorBaseBoundObject[0];
+            }
+        }
 
-                    try
-                    {
-                        directory = new DirectoryInfo(CurrentPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        directory = null;
-                        ErrorString = ex.ToString();
+        /// <summary>
+        /// Content of the current directory, including everything regardless of ignore filters
+        /// </summary>
+        public IEnumerable<EditorBaseBoundObject> UnfilteredContent
+        {
+            get
+            {
+                if (IsValid)
+                {
+                    return EnumerateDirectoryContent(null);
+                }
+                else
+                    return new EditorBaseBoundObject[0];
+            }
+        }
 
-                        IsValid = false;
-                    }
+        /// <summary>
+        /// Enumerate the content of the directory excluding elements matching the specified regexes
+        /// </summary>
+        /// <param name="ignoreRegexes"></param>
+        /// <returns></returns>
+        private IEnumerable<EditorBaseBoundObject> EnumerateDirectoryContent(Regex[] ignoreRegexes)
+        {
+            DirectoryInfo directory;
 
-                    if (directory != null)
+            try
+            {
+                directory = new DirectoryInfo(CurrentPath);
+            }
+            catch (Exception ex)
+            {
+                directory = null;
+                ErrorString = ex.ToString();
+
+                IsValid = false;
+            }
+
+            if (directory != null)
+            {
+                DirectoryInfo[] dirs = null;
+                try
+                {
+                    dirs = directory.GetDirectories();
+                }
+                catch { IsValid = false; }
+
+                if (dirs != null)
+                {
+                    foreach (var sub_dir in dirs)
                     {
-                        DirectoryInfo[] dirs = null;
-                        try
+                        string relativeDirPath = Path.Combine(RelativePath, sub_dir.Name);
+
+                        bool ignoreDirectory = false;
+
+                        if (ignoreRegexes != null)
                         {
-                            dirs = directory.GetDirectories();
-                        }
-                        catch { IsValid = false; }
-
-                        if (dirs != null)
-                        {
-                            foreach (var sub_dir in dirs)
+                            /* test to see if the directory should be ignored */
+                            foreach (var regex in ignoreRegexes)
                             {
-                                EditorContentDirectory contentDir = null;
-                                try
+                                if (regex.IsMatch(relativeDirPath))
                                 {
-                                    contentDir = new EditorContentDirectory(Editor, Path.Combine(RelativePath, sub_dir.Name), BasePath, sub_dir.FullName);
+                                    ignoreDirectory = true;
+                                    break;
                                 }
-                                catch { }
-
-                                if (contentDir != null)
-                                    yield return contentDir;
                             }
                         }
 
-                        FileInfo[] files = null;
-                        try
+                        if (!ignoreDirectory)
                         {
-                            files = directory.GetFiles();
-                        }
-                        catch { IsValid = false; }
+                            EditorContentDirectory contentDir = null;
 
-                        if (files != null)
-                        {
-                            foreach (var sub_file in files)
+                            try
                             {
-                                if (!CirrusDesignHelper.CirrusPackageExtention.Equals(sub_file.Extension, StringComparison.OrdinalIgnoreCase))
+                                contentDir = new EditorContentDirectory(Editor, relativeDirPath, BasePath, sub_dir.FullName);
+                            }
+                            catch { }
+
+                            if (contentDir != null)
+                                yield return contentDir;
+                        }
+                    }
+                }
+
+                FileInfo[] files = null;
+                try
+                {
+                    files = directory.GetFiles();
+                }
+                catch { IsValid = false; }
+
+                if (files != null)
+                {
+                    foreach (var sub_file in files)
+                    {
+                        if (!CirrusDesignHelper.CirrusPackageExtention.Equals(sub_file.Extension, StringComparison.OrdinalIgnoreCase))
+                        {
+                            string relativeFilePath = Path.Combine(RelativePath, sub_file.Name);
+
+                            bool ignoreFile = false;
+
+                            if (ignoreRegexes != null)
+                            {
+                                /* test to see if the directory should be ignored */
+                                foreach (var regex in ignoreRegexes)
                                 {
-                                    EditorContentFile contentFile = null;
-
-                                    try
+                                    if (regex.IsMatch(relativeFilePath))
                                     {
-                                        contentFile = new EditorContentFile(Editor, Path.Combine(RelativePath, sub_file.Name), BasePath, sub_file.FullName);
+                                        ignoreFile = true;
+                                        break;
                                     }
-                                    catch { }
-
-                                    if (contentFile != null)
-                                        yield return contentFile;
                                 }
+                            }
+
+                            if (!ignoreFile)
+                            {
+                                EditorContentFile contentFile = null;
+
+                                try
+                                {
+                                    contentFile = new EditorContentFile(Editor, relativeFilePath, BasePath, sub_file.FullName);
+                                }
+                                catch { }
+
+                                if (contentFile != null)
+                                    yield return contentFile;
                             }
                         }
                     }

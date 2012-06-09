@@ -92,7 +92,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Dialogs
         {
             get { return testing ? "Stop" : "Test Query"; }
         }
-                
+
         private void btnTestQuery_Click(object sender, RoutedEventArgs e)
         {
             if (UserValidateInput())
@@ -148,15 +148,15 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Dialogs
             TestingResult.Clear();
 
             testRegexes = (from string_entry in localIgnoreString.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                          select new Regex(string_entry, RegexOptions.IgnoreCase)).ToArray();
+                           select new Regex(string_entry, RegexOptions.IgnoreCase)).ToArray();
 
-                testQueue.Clear();
-                foreach (var rootElement in Editor.PackageContainer[0].Content)
-                {
-                    var objElement = rootElement as EditorContentObject;
-                    if (objElement != null)
-                        testQueue.Enqueue(objElement);
-                }
+            testQueue.Clear();
+            foreach (var rootElement in Editor.PackageContainer[0].Content)
+            {
+                var objElement = rootElement as EditorContentObject;
+                if (objElement != null)
+                    testQueue.Enqueue(objElement);
+            }
 
             var testThread = new Thread(TestThreadMain);
             testThread.IsBackground = true;
@@ -166,7 +166,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Dialogs
         private void StopTestQuery()
         {
             stopTesting = true;
-            while(testing)
+            while (testing)
                 Thread.Sleep(1);
         }
 
@@ -194,7 +194,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Dialogs
 
                         if (as_dir != null)
                         {
-                            foreach (var sub in as_dir.Content)
+                            foreach (var sub in as_dir.UnfilteredContent)
                             {
                                 if (stopTesting)
                                     return;
@@ -206,7 +206,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Dialogs
                         {
                             foreach (var testRegex in testRegexes)
                             {
-                                if (testRegex.IsMatch(as_file.CurrentPath))
+                                if (testRegex.IsMatch(as_file.RelativePath))
                                 {
                                     Dispatcher.BeginInvoke((Action)delegate
                                     {
