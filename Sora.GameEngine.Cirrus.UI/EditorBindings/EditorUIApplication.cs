@@ -25,6 +25,11 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         Dispatcher dispatcher;
 
+        public Dispatcher Dispatcher
+        {
+            get { return dispatcher; }
+        }
+
         private ApplicationSettingsXml settings;
 
         public ApplicationSettingsXml Settings
@@ -32,11 +37,15 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             get { return settings; }
         }
 
+        public SearchBindingProvider Search { get; private set; }
+
         public EditorUIApplication(MainWindow mainWindow)
         {
             this.mainWindow = mainWindow;
 
             dispatcher = mainWindow.Dispatcher;
+
+            Search = new SearchBindingProvider(this);
 
             NewFile = new GenericCommand((p) => ActionNewFile(p));
 
@@ -149,6 +158,13 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         #region Helper
 
+        public override void Refresh()
+        {
+            Search.SearchResult.Clear();
+
+            base.Refresh();
+        }
+
         public override void WrapAsyncAction(Action action)
         {
             if (action != null && dispatcher != null)
@@ -200,6 +216,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             }
             else
             {
+                Search.Stop();
+
                 switch (MessageBox.Show("Do you want to save your package before closing ?", "Closing", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
                 {
                     default:

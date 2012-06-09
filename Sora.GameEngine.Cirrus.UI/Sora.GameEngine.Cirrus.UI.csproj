@@ -74,6 +74,7 @@
     <Compile Include="Controls\MultipleSelectionTreeViewItem.cs" />
     <Compile Include="Controls\WpfPropertyGrid.cs" />
     <Compile Include="Converters\EditorContentFileToUIContentFileConverter.cs" />
+    <Compile Include="Converters\SearchTextBooleanConverter.cs" />
     <Compile Include="Converters\VisibilityBooleanConverter.cs" />
     <Compile Include="EditorBindings\ApplicationSettingsXml.cs" />
     <Compile Include="EditorBindings\DockableContentDescriptor.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="EditorBindings\Helpers\DictionaryCustomPropertiesProvider.cs" />
     <Compile Include="EditorBindings\EditorUIApplication.cs" />
     <Compile Include="EditorBindings\EditorUIContentFile.cs" />
+    <Compile Include="EditorBindings\SearchBindingProvider.cs" />
     <Compile Include="Selectors\ContentTemplateSelector.cs" />
     <Compile Include="SkinScrollBar\SkinScrollBarResources.cs" />
     <Page Include="AboutWindow.xaml">

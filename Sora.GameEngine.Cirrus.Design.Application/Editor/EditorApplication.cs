@@ -189,7 +189,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
             }
         }
 
-        public void Refresh()
+        public virtual void Refresh()
         {
             Status = "Refreshing ...";
 

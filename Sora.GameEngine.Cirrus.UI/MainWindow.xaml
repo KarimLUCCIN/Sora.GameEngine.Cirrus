@@ -11,6 +11,7 @@
     <Window.Resources>
         <converters:EditorContentFileToUIContentFileConverter x:Key="editorUIContentFileConverter"/>
         <converters:VisibilityBooleanConverter x:Key="visibleBooleanConverter"/>
+        <converters:SearchTextBooleanConverter x:Key="searchTextBooleanConverter"/>
         
         <HierarchicalDataTemplate x:Key="content_DefaultContainerTemplate" ItemsSource="{Binding Content}">
             <Grid Height="24">
@@ -144,7 +145,7 @@
                         </ad:DockableContent>
 
                         <ad:DockableContent x:Name="panelSearch" Title="Search">
-                            <Grid>
+                            <Grid DataContext="{Binding Search}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition/>
@@ -156,12 +157,17 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="4" Background="White">
-                                    <TextBox BorderThickness="0" Margin="2"/>
+                                    <TextBox BorderThickness="0" Margin="2" Text="{Binding Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Path=SearchString}">
+                                        <TextBox.InputBindings>
+                                            <KeyBinding Command="{Binding SearchAndStopCommand}" Key="Enter"/>
+                                        </TextBox.InputBindings>
+                                    </TextBox>
                                 </Border>
-                                
-                                <Button Grid.Column="1" Margin="4" Content="Search ..." Width="60" Height="22"/>
-                                
-                                <ListBox Grid.Row="1" Grid.ColumnSpan="2"/>
+
+                                <Button Grid.Column="1" Margin="4" Content="{Binding Searching, Converter={StaticResource searchTextBooleanConverter}}" Width="60" Height="22"
+                                        Command="{Binding SearchAndStopCommand}"/>
+
+                                <ListBox x:Name="searchResultBox" Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding SearchResult}" ItemTemplate="{StaticResource content_File}" SelectionChanged="searchResultBox_SelectionChanged"/>
                             </Grid>
                         </ad:DockableContent>
 
