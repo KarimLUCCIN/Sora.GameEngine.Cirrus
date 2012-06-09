@@ -10,6 +10,7 @@
         Title="{Binding Title}" Height="400" Width="525" Background="#FF626262" WindowStartupLocation="CenterScreen" Closed="Window_Closed" Closing="Window_Closing" Icon="/CirrusUI;component/LogoPure.ico">
     <Window.Resources>
         <converters:EditorContentFileToUIContentFileConverter x:Key="editorUIContentFileConverter"/>
+        <converters:VisibilityBooleanConverter x:Key="visibleBooleanConverter"/>
         
         <HierarchicalDataTemplate x:Key="content_DefaultContainerTemplate" ItemsSource="{Binding Content}">
             <Grid Height="24">
@@ -115,7 +116,7 @@
             <ad:ResizingPanel Orientation="Vertical">
                 <ad:ResizingPanel Orientation="Vertical" ad:ResizingPanel.ResizeHeight="50">
                     <ad:DockablePane ShowHeader="False" ShowTabs="False">
-                        <ad:DockableContent x:Name="toolbarBuild" Title="Build" IsCloseable="False">
+                        <ad:DockableContent x:Name="panelBuild" Title="Build">
                             <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="30">
                                 <StackPanel.Resources>
                                     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
@@ -136,13 +137,35 @@
                 <ad:ResizingPanel Orientation="Horizontal">
                     <ad:DockablePane ad:ResizingPanel.ResizeWidth="200">
 
-                        <ad:DockableContent x:Name="propertiesContent" Title="Properties" IsCloseable="False">
+                        <ad:DockableContent x:Name="panelProperties" Title="Properties">
                             <controls:WpfPropertyGrid x:Name="globalPropertyGrid" 
                                                       HelpVisible="True" 
                                                       ToolbarVisible="True"></controls:WpfPropertyGrid>
                         </ad:DockableContent>
 
-                        <ad:DockableContent x:Name="sceneTreeContent" IsCloseable="False" Title="Package">
+                        <ad:DockableContent x:Name="panelSearch" Title="Search">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="4" Background="White">
+                                    <TextBox BorderThickness="0" Margin="2"/>
+                                </Border>
+                                
+                                <Button Grid.Column="1" Margin="4" Content="Search ..." Width="60" Height="22"/>
+                                
+                                <ListBox Grid.Row="1" Grid.ColumnSpan="2"/>
+                            </Grid>
+                        </ad:DockableContent>
+
+                        <ad:DockableContent x:Name="panelContent" Title="Package">
                             <Border Background="White">
                                 <local:MultipleSelectionTreeView SelectionMode="KeyboardModifiersMode" ItemsSource="{Binding PackageContainer}" x:Name="packageContentTree" Background="White"
                                                                  SelectionChanged="packageContentTree_SelectionChanged">
@@ -163,7 +186,7 @@
                             </Border>
                         </ad:DockableContent>
 
-                        <ad:DockableContent x:Name="debugOutputContent" IsCloseable="False" Title="Output">
+                        <ad:DockableContent x:Name="panelOutput" Title="Output">
                             <ListView ItemsSource="{Binding Builder.BuildOutput}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <ListView.View>
                                     <GridView>
@@ -177,11 +200,6 @@
                         </ad:DockableContent>
                     </ad:DockablePane>
 
-                    <ad:DocumentPane>
-                        <ad:DocumentContent IsCloseable="False" Title="Preview">
-
-                        </ad:DocumentContent>
-                    </ad:DocumentPane>
                 </ad:ResizingPanel>
             </ad:ResizingPanel>
         </ad:DockingManager>
@@ -206,6 +224,18 @@
                 <MenuItem Header="Save As" Command="{Binding SaveAsFile}"/>
                 <Separator/>
                 <MenuItem Header="Quit" Command="{Binding Quit}"/>
+            </MenuItem>
+
+            <MenuItem Header="View" ItemsSource="{Binding ElementName=mainWindow, Path=Panels}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Header" Value="{Binding Title}"/>
+                        <Setter Property="Command" Value="{Binding ElementName=mainWindow, Path=OpenPanelCommand}"/>
+                        <Setter Property="CommandParameter" Value="{Binding}"/>
+                        <Setter Property="CommandTarget" Value="{Binding ElementName=mainWindow}"/>
+                        <Setter Property="IsChecked" Value="{Binding Visibility, Converter={StaticResource visibleBooleanConverter}, Mode=OneWay}"/>
+                    </Style>
+                </MenuItem.ItemContainerStyle>
             </MenuItem>
 
             <MenuItem Header="Edit" ItemsSource="{Binding ContextCommands}">

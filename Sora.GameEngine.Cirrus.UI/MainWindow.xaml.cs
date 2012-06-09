@@ -13,19 +13,29 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Sora.GameEngine.Cirrus.UI.EditorBindings;
 using Sora.GameEngine.Cirrus.UI.Controls;
+using System.Collections.ObjectModel;
+using AvalonDock;
+using System.ComponentModel;
+using Sora.GameEngine.Cirrus.Design.Application.Helpers;
 
 namespace Sora.GameEngine.Cirrus.UI
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public EditorUIApplication editorApplication;
 
+        public ObservableCollection<DockableContentDescriptor> Panels { get; private set; }
+
         public MainWindow()
         {
+            Panels = new ObservableCollection<DockableContentDescriptor>();
+
             InitializeComponent();
+
+            LoadPanelElements();
 
             editorApplication = new EditorUIApplication(this);
             editorApplication.RefreshPropertiesViewRequested += delegate
@@ -42,6 +52,34 @@ namespace Sora.GameEngine.Cirrus.UI
 
             editorApplication.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(editorApplication_PropertyChanged);
             globalPropertyGrid.SelectedObjects = editorApplication.SelectionForProperties;
+        }
+
+        private GenericCommand openPanelCommand;
+
+        public GenericCommand OpenPanelCommand
+        {
+            get { return openPanelCommand; }
+            set
+            {
+                openPanelCommand = value;
+                RaisePropertyChanged("OpenPanelCommand");
+            }
+        }
+
+        private void LoadPanelElements()
+        {
+            Panels.Add(new DockableContentDescriptor(panelBuild));
+            Panels.Add(new DockableContentDescriptor(panelContent));
+            Panels.Add(new DockableContentDescriptor(panelOutput));
+            Panels.Add(new DockableContentDescriptor(panelProperties));
+            Panels.Add(new DockableContentDescriptor(panelSearch));
+
+            OpenPanelCommand = new GenericCommand((p) =>
+            {
+                var panel = p as DockableContentDescriptor;
+                if (panel != null)
+                    panel.Panel.Show();
+            });
         }
 
         #region Actions Helpers
@@ -130,6 +168,18 @@ namespace Sora.GameEngine.Cirrus.UI
                 source = VisualTreeHelper.GetParent(source);
 
             return source as TreeViewItem;
+        }
+
+        #endregion
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChanged(string property)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(property));
         }
 
         #endregion
