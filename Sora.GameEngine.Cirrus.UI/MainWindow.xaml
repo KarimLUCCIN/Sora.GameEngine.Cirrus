@@ -167,7 +167,7 @@
                                 <Button Grid.Column="1" Margin="4" Content="{Binding Searching, Converter={StaticResource searchTextBooleanConverter}}" Width="60" Height="22"
                                         Command="{Binding SearchAndStopCommand}"/>
 
-                                <ListBox x:Name="searchResultBox" Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding SearchResult}" ItemTemplate="{StaticResource content_File}" SelectionChanged="searchResultBox_SelectionChanged"/>
+                                <local:MultipleSelectionTreeView SelectionMode="KeyboardModifiersMode" Background="White" x:Name="searchResultBox" Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding SearchResult}" ItemTemplateSelector="{StaticResource contentTemplateSelector}" SelectionChanged="searchResultBox_SelectionChanged"/>
                             </Grid>
                         </ad:DockableContent>
 

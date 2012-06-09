@@ -22,9 +22,9 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             get { return editor; }
         }
 
-        private ObservableCollection<EditorContentFile> searchResult = new ObservableCollection<EditorContentFile>();
+        private ObservableCollection<object> searchResult = new ObservableCollection<object>();
 
-        public ObservableCollection<EditorContentFile> SearchResult
+        public ObservableCollection<object> SearchResult
         {
             get { return searchResult; }
         }
@@ -90,7 +90,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             {
                 try
                 {
-                    searchRegex = new Regex(searchString);
+                    searchRegex = new Regex(searchString, RegexOptions.IgnoreCase);
                 }
                 catch(Exception ex)
                 {
@@ -153,6 +153,11 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
                         if (as_dir != null)
                         {
+                            if (searchRegex.IsMatch(as_dir.Title))
+                            {
+                                AppendSearchResult(as_dir);
+                            }
+
                             foreach (var sub in as_dir.Content)
                             {
                                 if (searchStop)
@@ -163,7 +168,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
                         }
                         else if (as_file != null)
                         {
-                            if (searchRegex.IsMatch(as_file.CurrentPath))
+                            if (searchRegex.IsMatch(as_file.Title))
                             {
                                 AppendSearchResult(as_file);
                             }
@@ -181,12 +186,15 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             }
         }
 
-        private void AppendSearchResult(EditorContentFile as_file)
+        private void AppendSearchResult(EditorContentObject ed_obj)
         {
             Editor.Dispatcher.BeginInvoke((Action)delegate
             {
-                if (searching && !searchStop)
-                    SearchResult.Add(as_file);
+                var as_file = ed_obj as EditorContentFile;
+                if (as_file != null)
+                    SearchResult.Add(new EditorUIContentFile(as_file));
+                else
+                    SearchResult.Add(ed_obj);
             });
         }
 

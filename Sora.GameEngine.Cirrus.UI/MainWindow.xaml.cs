@@ -84,9 +84,12 @@ namespace Sora.GameEngine.Cirrus.UI
 
         #region Actions Helpers
 
-        private void searchResultBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void searchResultBox_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            globalPropertyGrid.SelectedObjects = (from object item in searchResultBox.SelectedItems.AsQueryable() select item).ToArray();
+            globalPropertyGrid.SelectedObjects = (
+                from object item in searchResultBox.SelectedItems.AsQueryable()
+                where item is MultipleSelectionTreeViewItem
+                select ((MultipleSelectionTreeViewItem)item).DataContext).ToArray();
         }
 
         void editorApplication_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
