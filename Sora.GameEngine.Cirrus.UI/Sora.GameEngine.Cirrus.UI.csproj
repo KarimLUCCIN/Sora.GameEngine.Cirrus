@@ -77,6 +77,9 @@
     <Compile Include="Converters\SearchTextBooleanConverter.cs" />
     <Compile Include="Converters\VisibilityBooleanConverter.cs" />
     <Compile Include="EditorBindings\ApplicationSettingsXml.cs" />
+    <Compile Include="EditorBindings\Dialogs\IgnoreListEditDialog.xaml.cs">
+      <DependentUpon>IgnoreListEditDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EditorBindings\DockableContentDescriptor.cs" />
     <Compile Include="EditorBindings\EditorActionsProvider.cs" />
     <Compile Include="EditorBindings\Editors\CustomEditorImporters.cs" />
@@ -97,6 +100,10 @@
     <Page Include="Controls\Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EditorBindings\Dialogs\IgnoreListEditDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EditorBindings\Editors\EditorBindingsCustomEditors.xaml">
       <SubType>Designer</SubType>

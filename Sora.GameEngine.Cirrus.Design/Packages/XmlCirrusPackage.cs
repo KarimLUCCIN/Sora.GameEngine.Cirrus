@@ -44,6 +44,13 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
         public string Description { get; set; }
 
         /// <summary>
+        /// Ignore string (one regex per line) used to exclude elements from the package.
+        /// The regex are working on all the path and not juste the file name
+        /// </summary>
+        [XmlElement("ignore")]
+        public string IgnoreString { get; set; }
+
+        /// <summary>
         /// Root path of the package. Everything inside this directory will be available.
         /// </summary>
         /// <remarks>The root can be a path relative to this package directory</remarks>

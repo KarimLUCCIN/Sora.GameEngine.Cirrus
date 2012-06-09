@@ -12,6 +12,7 @@ using Sora.GameEngine.Cirrus.Design.Application.Editor;
 using Microsoft.Win32;
 using System.Windows;
 using Sora.GameEngine.Cirrus.Design;
+using Sora.GameEngine.Cirrus.UI.EditorBindings.Dialogs;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {
@@ -46,9 +47,17 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
 
             targetCollection.Add(new GenericCommand(_ => editorApplication.Refresh()) { DisplayName = "Refresh View" });
+
+            targetCollection.Add(new GenericCommand(EditIgnoreList) { DisplayName = "Edit Ignore List" });
         }
 
         #region Utils
+
+        private void EditIgnoreList(object p)
+        {
+            var dlg = new IgnoreListEditDialog(editorApplication);
+            dlg.ShowDialog();
+        }
 
         private void ResetProperties(object p)
         {
