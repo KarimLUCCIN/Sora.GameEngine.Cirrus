@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using Sora.GameEngine.Cirrus.Design.Application.Helpers;
 using Sora.GameEngine.Cirrus.Design.Application.Editor;
+using Sora.GameEngine.Cirrus.Design.Application.Build;
 
 namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 {
@@ -69,7 +70,92 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             OpenRecent = new GenericCommand(ActionOpenRecent);
 
             LoadApplicationSettings();
+
+            Build_OutputCommands = new ObservableCollection<GenericCommand>();
+            Build_OutputCommands.Add(new GenericCommand(Build_Action_CopySelection, (item) => SelectedBuildMessage != null) { DisplayName = "Copy Selection" });
+            Build_OutputCommands.Add(new GenericCommand(Build_Action_CopyAll) { DisplayName = "Copy All" });
+            Build_OutputCommands.Add(new GenericCommand(Build_Action_SaveAll) { DisplayName = "Save to file" });
+
+            SelectedBuildMessage = new BuildMessage();
+            Builder.BuildOutput.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(BuildOutput_CollectionChanged);
         }
+
+        #region Build Helpers
+
+        public ObservableCollection<GenericCommand> Build_OutputCommands { get; private set; }
+
+        private BuildMessage selectedBuildMessage;
+
+        public BuildMessage SelectedBuildMessage
+        {
+            get { return selectedBuildMessage; }
+            set
+            {
+                selectedBuildMessage = value;
+
+                foreach (var command in Build_OutputCommands)
+                    command.Refresh();
+
+                RaisePropertyChanged("SelectedBuildMessage");
+            }
+        }
+
+        public void Build_Action_CopySelection(object parameter)
+        {
+            if (selectedBuildMessage != null)
+                Clipboard.SetText(selectedBuildMessage.ToString());
+        }
+
+        public void Build_Action_CopyAll(object parameter)
+        {
+            if (Builder.BuildOutput.Count > 0)
+                Clipboard.SetText(String.Concat(from message in Builder.BuildOutput select (message.ToString() + "\r\n")));
+        }
+
+        public void Build_Action_SaveAll(object parameter)
+        {
+            var sfd = new SaveFileDialog();
+            sfd.Filter = "Text Files (*.txt)|*.txt";
+            if (sfd.ShowDialog() == true)
+            {
+                try
+                {
+                    using (var stream = new FileStream(sfd.Filter, FileMode.Create))
+                    {
+                        using (var writer = new StreamWriter(stream))
+                        {
+                            foreach (var message in Builder.BuildOutput)
+                            {
+                                writer.WriteLine(message.ToString());
+                            }
+
+                            writer.Flush();
+                        }
+                        stream.Flush();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        void BuildOutput_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                    {
+                        SelectedBuildMessage = null;
+                        break;
+                    }
+            }
+        }
+
+        #endregion
 
         #region Application Settings
         public GenericCommand OpenRecent { get; private set; }

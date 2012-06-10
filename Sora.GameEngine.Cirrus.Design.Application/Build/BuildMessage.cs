@@ -39,5 +39,10 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             get { return source; }
             set { source = value; }
         }
+
+        public override string ToString()
+        {
+            return String.Format("[{0} : {1}]\t\t{2}", Severity, source, message);
+        }
     }
 }

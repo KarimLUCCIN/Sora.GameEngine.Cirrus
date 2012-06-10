@@ -25,6 +25,36 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
             }
         }
 
+        [Description("The higher the build order, the sooner it will be processed during the build relative to the other directories of the same level")]
+        public int BuildOrder
+        {
+            get
+            {
+                var directoryPropertyDescriptor = Editor.CurrentPackage.GetItemDescriptor("::" + RelativePath, false);
+                if (directoryPropertyDescriptor == null)
+                    return 0;
+                else
+                {
+                    var buildOrderProperty = directoryPropertyDescriptor.GetProperty("BuildOrder", false);
+
+                    if (buildOrderProperty == null)
+                        return 0;
+                    else
+                    {
+                        int orderValue;
+                        if (int.TryParse(buildOrderProperty.Value, out orderValue))
+                            return orderValue;
+                        else
+                            return 0;
+                    }
+                }
+            }
+            set
+            {
+                Editor.CurrentPackage.GetItemDescriptor("::" + RelativePath, true).GetProperty("BuildOrder", true).Value = value.ToString();
+            }
+        }
+
         /// <summary>
         /// Content of the current directory, considering the ignore filters defined at project level
         /// </summary>

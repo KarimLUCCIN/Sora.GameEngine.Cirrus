@@ -194,7 +194,18 @@
                         </ad:DockableContent>
 
                         <ad:DockableContent x:Name="panelOutput" Title="Output">
-                            <ListView ItemsSource="{Binding Builder.BuildOutput}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListView ItemsSource="{Binding Builder.BuildOutput}" SelectedItem="{Binding SelectedBuildMessage, Mode=TwoWay}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                                <ListView.ContextMenu>
+                                    <ContextMenu ItemsSource="{Binding Build_OutputCommands}">
+                                        <ContextMenu.ItemTemplate>
+                                            <DataTemplate>
+                                                <MenuItem Header="{Binding DisplayName}" Command="{Binding}" CommandTarget="{Binding ElementName=mainWindow}"/>
+                                            </DataTemplate>
+                                        </ContextMenu.ItemTemplate>
+                                    </ContextMenu>
+                                </ListView.ContextMenu>
+                                
                                 <ListView.View>
                                     <GridView>
                                         <GridViewColumn Header="Order" DisplayMemberBinding="{Binding Order}"/>

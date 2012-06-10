@@ -109,9 +109,9 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                     }
 
                     if (BuildSucceeded == true)
-                        Build_Message("Compilation success", "BuildTask", BuildMessageSeverity.Information);
+                        Build_Message("Build success", "BuildTask", BuildMessageSeverity.Information);
                     else
-                        Build_Message("Compilation failed", "BuildTask", BuildMessageSeverity.Error);
+                        Build_Message("Build failed", "BuildTask", BuildMessageSeverity.Error);
                 }
                 finally
                 {
@@ -120,7 +120,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                     CanBuild = true;
                     Building = false;
 
-                    Editor.DefaultStatus();
+                    Editor.Status = BuildSucceeded == true ? "Build success" : "Build failed";
                 }
             });
         }
@@ -179,7 +179,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                         enumeratorStack.Push(from element in as_directory.Content where element is EditorContentFile select (EditorContentObject)element);
 
                         /* sub directories */
-                        enumeratorStack.Push(from element in as_directory.Content where element is EditorContentDirectory select (EditorContentObject)element);
+                        enumeratorStack.Push(from element in as_directory.Content where element is EditorContentDirectory orderby ((EditorContentDirectory)element).BuildOrder select (EditorContentObject)element);
 
 
                         if (!as_directory.IsValid)
@@ -633,6 +633,11 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
         internal string XNAIntermediateDirectory { get; private set; }
         internal string XNAOutputDirectory { get; private set; }
 
+        private string AbsoluteDirectoryConvert(string directory)
+        {
+            return new DirectoryInfo(directory).FullName;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -642,11 +647,11 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
         {
             var outputBaseDirectory = GetOutputBaseDirectory(packageCopy);
 
-            XNAOutputDirectory = Path.Combine(outputBaseDirectory, GetSafeContentDirectorySuffix(packageCopy));
+            XNAOutputDirectory = AbsoluteDirectoryConvert(Path.Combine(outputBaseDirectory, GetSafeContentDirectorySuffix(packageCopy)));
 
             /* each content has to have an independant intermediate directory, so we generate an unique key for them (approximately) */
-            var xnaIntermediateSubDir = Path.Combine("ContentIntermediate", GenerateContentSubDirectory(packageCopy.CurrentPackagePath, contextId));
-            XNAIntermediateDirectory = Path.Combine(outputBaseDirectory, xnaIntermediateSubDir);
+            var xnaIntermediateSubDir = Path.Combine("obj", GenerateContentSubDirectory(packageCopy.CurrentPackagePath, contextId));
+            XNAIntermediateDirectory = AbsoluteDirectoryConvert(Path.Combine(outputBaseDirectory, xnaIntermediateSubDir));
 
             if (!String.IsNullOrEmpty(contextId))
             {
@@ -689,7 +694,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             else
                 contextId = "." + contextId;
 
-            return String.Format("{0}_{1}{2}", GetMD5Hash(path), Path.GetFileNameWithoutExtension(path), contextId);
+            return String.Format("{0}_{1}{2}", GetMD5Hash(path).Substring(0,8), Path.GetFileNameWithoutExtension(path), contextId);
         }
 
         private static string GetOutputBaseDirectory(EditorApplication packageCopy)

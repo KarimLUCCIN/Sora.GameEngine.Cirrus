@@ -86,10 +86,10 @@ namespace Sora.GameEngine.Cirrus.UI
 
         private void searchResultBox_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            globalPropertyGrid.SelectedObjects = (
+            globalPropertyGrid.SelectedObjects = WrapForBestSelectionObjectTypes((
                 from object item in searchResultBox.SelectedItems.AsQueryable()
                 where item is MultipleSelectionTreeViewItem
-                select ((MultipleSelectionTreeViewItem)item).DataContext).ToArray();
+                select ((MultipleSelectionTreeViewItem)item).DataContext).ToArray());
         }
 
         void editorApplication_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -148,7 +148,22 @@ namespace Sora.GameEngine.Cirrus.UI
 
         private void packageContentTree_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            editorApplication.SelectionForProperties = (from element in packageContentTree.SelectedItems select element.DataContext).ToArray();
+            editorApplication.SelectionForProperties = WrapForBestSelectionObjectTypes((from element in packageContentTree.SelectedItems select element.DataContext).ToArray());
+        }
+
+        private object[] WrapForBestSelectionObjectTypes(object[] p_list)
+        {
+            var files_count = p_list.Count((item) => item is EditorUIContentFile);
+
+            if (files_count <= 1 || files_count != p_list.Length)
+                return p_list;
+            else
+            {
+                /* I can't figure out how to merge several property descriptions, but at least I can merge
+                 * Processor and Importer properties
+                 */
+                return (from EditorUIContentFile entry in p_list select entry.EdFile).ToArray();
+            }
         }
 
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
