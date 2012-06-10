@@ -150,29 +150,37 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
         {
             if (action != null)
             {
-                /* we process files level by level to ensure that lower level files will be evaluated after all
+                /* We process files using depth traversal to ensure that lower level files will be evaluated before all
                  * high level files
+                 * 
+                 * This allows to build Levels depending on sub components placed below in the graph
                  */
-                var enumeratorQueue = new Queue<EditorContentObject>();
+                var enumeratorStack = new Stack<EditorContentObject>();
 
-                /* first, we add the root files */
-                enumeratorQueue.Enqueue(from obj in buildPackageApplication.PackageContainer[0].Content where obj is EditorContentFile select (EditorContentFile)obj);
+                /* we add the root files */
+                enumeratorStack.Push(from obj in buildPackageApplication.PackageContainer[0].Content where obj is EditorContentFile select (EditorContentFile)obj);
 
-                /* then, root directories */
-                enumeratorQueue.Enqueue(from obj in buildPackageApplication.PackageContainer[0].Content where obj is EditorContentDirectory select (EditorContentDirectory)obj);
+                /* root directories */
+                enumeratorStack.Push(from obj in buildPackageApplication.PackageContainer[0].Content where obj is EditorContentDirectory select (EditorContentDirectory)obj);
+
 
                 /* and here we go */
-                while (enumeratorQueue.Count > 0)
+                while (enumeratorStack.Count > 0)
                 {
-                    var current = enumeratorQueue.Dequeue();
+                    var current = enumeratorStack.Pop();
                     var as_file = current as EditorContentFile;
                     var as_directory = current as EditorContentDirectory;
 
                     if (as_directory != null)
                     {
                         Build_Message(String.Format("Directory - {0}", as_directory.RelativePath), "Build_EnumFiles", BuildMessageSeverity.Information);
+                        
+                        /* sub files */
+                        enumeratorStack.Push(from element in as_directory.Content where element is EditorContentFile select (EditorContentObject)element);
 
-                        enumeratorQueue.Enqueue(from element in as_directory.Content select (EditorContentObject)element);
+                        /* sub directories */
+                        enumeratorStack.Push(from element in as_directory.Content where element is EditorContentDirectory select (EditorContentObject)element);
+
 
                         if (!as_directory.IsValid)
                             Build_Message(String.Format("Directory {0} was marked as invalid", as_directory.RelativePath), "Build_EnumFiles", BuildMessageSeverity.Warning);
@@ -478,11 +486,11 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             // the RootDirectory must contain the sourceFile to avoid an "%0" from being appended to the   
             // output file name  
             //  
-            build.RootDirectory = GetContentBaseDirectory(packageCopy);
+            var computedRootDirectory = String.IsNullOrEmpty(packageCopy.CurrentPackage.BuildRootRelativeDirectory)
+            ? GetContentBaseDirectory(packageCopy)
+            : Path.Combine(GetContentBaseDirectory(packageCopy), packageCopy.CurrentPackage.BuildRootRelativeDirectory);
 
-            Environment.CurrentDirectory = String.IsNullOrEmpty(packageCopy.CurrentPackage.BuildRootRelativeDirectory)
-            ? build.RootDirectory
-            : Path.Combine(build.RootDirectory, packageCopy.CurrentPackage.BuildRootRelativeDirectory);
+            Environment.CurrentDirectory = build.RootDirectory = computedRootDirectory;
 
             build.IntermediateDirectory = XNAIntermediateDirectory;
             build.LoggerRootDirectory = null;
