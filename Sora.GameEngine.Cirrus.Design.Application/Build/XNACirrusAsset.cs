@@ -35,7 +35,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             // a %0 will be appended the the sourceFile name if a "Name" isn't in the metadata  
             // .xnb will be appended to the name   
             //  
-            //metaData.Add("Name", Path.GetFileNameWithoutExtension(pathToAsset));
+            metaData.Add("Name", Path.GetFileNameWithoutExtension(pathToAsset));
 
             var contentInfo = contentFile.GetContentInfo(false);
             if (contentInfo != null)
