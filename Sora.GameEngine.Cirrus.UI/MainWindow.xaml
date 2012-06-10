@@ -96,16 +96,7 @@
                                            PackageReferenceTemplate="{StaticResource content_Reference_package}"
                                            />
     </Window.Resources>
-    <Grid ContextMenuOpening="ContextMenu_ContextMenuOpening">
-        <Grid.ContextMenu>
-            <ContextMenu ItemsSource="{Binding ContextCommands}" x:Name="gridContextMenu">
-                <ContextMenu.ItemTemplate>
-                    <DataTemplate>
-                        <MenuItem Header="{Binding DisplayName}" Command="{Binding}" CommandTarget="{Binding ElementName=mainWindow}"/>
-                    </DataTemplate>
-                </ContextMenu.ItemTemplate>
-            </ContextMenu>
-        </Grid.ContextMenu>
+    <Grid>
         
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
@@ -172,7 +163,17 @@
                         </ad:DockableContent>
 
                         <ad:DockableContent x:Name="panelContent" Title="Package">
-                            <Border Background="White">
+                            <Border Background="White" ContextMenuOpening="ContextMenu_ContextMenuOpening">
+                                <Border.ContextMenu>
+                                    <ContextMenu ItemsSource="{Binding ContextCommands}" x:Name="gridContextMenu">
+                                        <ContextMenu.ItemTemplate>
+                                            <DataTemplate>
+                                                <MenuItem Header="{Binding DisplayName}" Command="{Binding}" CommandTarget="{Binding ElementName=mainWindow}"/>
+                                            </DataTemplate>
+                                        </ContextMenu.ItemTemplate>
+                                    </ContextMenu>
+                                </Border.ContextMenu>
+                                
                                 <local:MultipleSelectionTreeView SelectionMode="KeyboardModifiersMode" ItemsSource="{Binding PackageContainer}" x:Name="packageContentTree" Background="White"
                                                                  SelectionChanged="packageContentTree_SelectionChanged">
                                     <local:MultipleSelectionTreeView.ItemTemplate>

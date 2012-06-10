@@ -79,7 +79,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             return true;
         }
 
-        private void Build_WrapBuildProcessTaskAsync(EditorApplication packageCopy, Func<bool> buildTask)
+        private void Build_WrapBuildProcessTaskAsync(EditorApplication packageCopy, string contextId, Func<bool> buildTask)
         {
             Building = true;
             CanBuild = false;
@@ -94,7 +94,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                 {
                     try
                     {
-                        XNAContextInit(packageCopy);
+                        XNAContextInit(packageCopy, contextId);
 
                         BuildSucceeded = buildTask();
                     }
@@ -274,8 +274,12 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             }
         }
 
-
-        public void ActionBuild()
+        /// <summary>
+        /// Build changed content
+        /// </summary>
+        /// <param name="contextId">contextId is used to isolate sub build configurations of the same package</param>
+        /// <param name="filesFilter">Filter that can be used to filter out of the build process files from the main package AND from it dependencies</param>
+        public void ActionBuild(string contextId = null, Predicate<EditorContentFile> filesFilter = null)
         {
             if (CanBuild)
             {
@@ -283,15 +287,20 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                 if (Build_CheckConditions())
                 {
                     var packageCopy = Build_GetPackageCopy();
-                    Build_WrapBuildProcessTaskAsync(packageCopy, delegate
+                    Build_WrapBuildProcessTaskAsync(packageCopy, contextId, delegate
                     {
-                        return Build_Execute(packageCopy, false, packageCopy.CurrentPackage.CompressContent);
+                        return Build_Execute(packageCopy, contextId, false, packageCopy.CurrentPackage.CompressContent, filesFilter);
                     });
                 }
             }
         }
 
-        public void ActionRebuildAll()
+        /// <summary>
+        /// Rebuild content
+        /// </summary>
+        /// <param name="contextId">contextId is used to isolate sub build configurations of the same package</param>
+        /// <param name="filesFilter">Filter that can be used to filter out of the build process files from the main package AND from it dependencies</param>
+        public void ActionRebuildAll(string contextId = null, Predicate<EditorContentFile> filesFilter = null)
         {
             if (CanBuild)
             {
@@ -299,9 +308,9 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                 if (Build_CheckConditions())
                 {
                     var packageCopy = Build_GetPackageCopy();
-                    Build_WrapBuildProcessTaskAsync(packageCopy, delegate
+                    Build_WrapBuildProcessTaskAsync(packageCopy, contextId, delegate
                     {
-                        return Build_Execute(packageCopy, true, packageCopy.CurrentPackage.CompressContent);
+                        return Build_Execute(packageCopy, contextId, true, packageCopy.CurrentPackage.CompressContent, filesFilter);
                     });
                 }
             }
@@ -346,7 +355,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
         #region Building operations
 
-        private bool Build_Execute(EditorApplication packageCopy, bool rebuild, bool compress, List<string> callTree = null, List<string> builtPackages = null)
+        private bool Build_Execute(EditorApplication packageCopy, string contextId, bool rebuild, bool compress, Predicate<EditorContentFile> filesFilter = null, List<string> callTree = null, List<string> builtPackages = null)
         {
             /* callTree is used to identify circular references */
             if (callTree == null)
@@ -367,7 +376,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                     {
                         var referencePath = ParseReferencePath(packageCopy, packageReference.Reference);
 
-                        if (!ProcessPackageReference(packageCopy, referencePath, rebuild, compress, callTree, builtPackages))
+                        if (!ProcessPackageReference(packageCopy, referencePath, contextId, rebuild, compress, filesFilter, callTree, builtPackages))
                             return false;
                     }
                     else
@@ -383,7 +392,13 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
 
             bool success = Build_ActionForAllFiles(packageCopy, (file) =>
             {
-                Build_ProcessFile(decodedAssets, packageCopy, file);
+                if (filesFilter == null || filesFilter(file))
+                {
+                    Build_ProcessFile(decodedAssets, packageCopy, file);
+                }
+                else
+                    Build_Message("-- Skipped by filter");
+
                 return true;
             });
 
@@ -412,14 +427,14 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             return success;
         }
 
-        private bool Build_Sync_Execute(bool rebuild, bool compress, List<string> callTree, List<string> builtPackages)
+        private bool Build_Sync_Execute(string contextId, bool rebuild, bool compress, Predicate<EditorContentFile> filesFilter, List<string> callTree, List<string> builtPackages)
         {
             var packageCopy = Build_GetPackageCopy();
 
-            XNAContextInit(packageCopy);
+            XNAContextInit(packageCopy, contextId);
             try
             {
-                return Build_Execute(packageCopy, rebuild, compress, callTree, builtPackages);
+                return Build_Execute(packageCopy, contextId, rebuild, compress, filesFilter, callTree, builtPackages);
             }
             finally
             {
@@ -427,7 +442,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             }
         }
 
-        private bool ProcessPackageReference(EditorApplication packageCopy, string referencePath, bool rebuild, bool compress, List<string> callTree, List<string> builtPackages)
+        private bool ProcessPackageReference(EditorApplication packageCopy, string referencePath, string contextId, bool rebuild, bool compress, Predicate<EditorContentFile> filesFilter, List<string> callTree, List<string> builtPackages)
         {
             if (cancellationPending)
                 return false;
@@ -443,7 +458,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             {
                 if (builtPackages.Contains(referencePath))
                 {
-                    Build_Message("Package already built. Skipping ...", "PackageReferenceResolve", BuildMessageSeverity.Information);
+                    Build_Message("--- Package already built. Skipping ...", "PackageReferenceResolve", BuildMessageSeverity.Information);
                     return true;
                 }
                 else
@@ -465,7 +480,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                         referencedPackage.Builder.cancellationPending = cancellationPending;
                     };
 
-                    var success = referencedPackage.Builder.Build_Sync_Execute(rebuild, compress, newCallTree, builtPackages);
+                    var success = referencedPackage.Builder.Build_Sync_Execute(contextId, rebuild, compress, filesFilter, newCallTree, builtPackages);
 
                     if (success)
                     {
@@ -618,15 +633,35 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
         internal string XNAIntermediateDirectory { get; private set; }
         internal string XNAOutputDirectory { get; private set; }
 
-        private void XNAContextInit(EditorApplication packageCopy)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="packageCopy"></param>
+        /// <param name="contextId">contextId is used to isolate sub build configurations of the same package</param>
+        private void XNAContextInit(EditorApplication packageCopy, string contextId)
         {
             var outputBaseDirectory = GetOutputBaseDirectory(packageCopy);
 
             XNAOutputDirectory = Path.Combine(outputBaseDirectory, GetSafeContentDirectorySuffix(packageCopy));
 
             /* each content has to have an independant intermediate directory, so we generate an unique key for them (approximately) */
-            var xnaIntermediateSubDir = Path.Combine("ContentIntermediate", GenerateContentSubDirectory(packageCopy.CurrentPackagePath));
+            var xnaIntermediateSubDir = Path.Combine("ContentIntermediate", GenerateContentSubDirectory(packageCopy.CurrentPackagePath, contextId));
             XNAIntermediateDirectory = Path.Combine(outputBaseDirectory, xnaIntermediateSubDir);
+
+            if (!String.IsNullOrEmpty(contextId))
+            {
+                /* Because XNA always clear the content before compiling if it doesn't match its file, 
+                 * we force a full rebuild when the context is not null (ie. SingleItemBuild)
+                 */
+                try
+                {
+                    var xnaContentXmlPath = Path.Combine(XNAIntermediateDirectory, "ContentPipeline.xml");
+
+                    if (File.Exists(xnaContentXmlPath))
+                        File.Delete(xnaContentXmlPath);
+                }
+                catch { }
+            }
 
             XNALogger = new BuildLogger(this);
         }
@@ -647,9 +682,14 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             return result.ToString();
         }
 
-        private string GenerateContentSubDirectory(string path)
+        private string GenerateContentSubDirectory(string path, string contextId)
         {
-            return String.Format("{0}_{1}", GetMD5Hash(path), Path.GetFileNameWithoutExtension(path));
+            if (String.IsNullOrEmpty(contextId))
+                contextId = String.Empty;
+            else
+                contextId = "." + contextId;
+
+            return String.Format("{0}_{1}{2}", GetMD5Hash(path), Path.GetFileNameWithoutExtension(path), contextId);
         }
 
         private static string GetOutputBaseDirectory(EditorApplication packageCopy)

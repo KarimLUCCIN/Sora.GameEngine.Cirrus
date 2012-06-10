@@ -49,9 +49,65 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             targetCollection.Add(new GenericCommand(_ => editorApplication.Refresh()) { DisplayName = "Refresh View" });
 
             targetCollection.Add(new GenericCommand(EditIgnoreList) { DisplayName = "Edit Ignore List" });
+
+            targetCollection.Add(rebuildSelectionCommand = new GenericCommand(
+                RebuildSelection,
+                (p) => editorApplication.Builder.CanBuild && editorApplication.SelectionForProperties.FirstOrDefault((item) => item is EditorContentFile || item is EditorUIContentFile) != null) { DisplayName = "Rebuild Selection" });
+
+            editorApplication.Builder.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Builder_PropertyChanged);
+        }
+
+        private GenericCommand rebuildSelectionCommand;
+
+        void Builder_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            editorApplication.WrapAsyncAction((Action)delegate
+            {
+                if (rebuildSelectionCommand != null)
+                {
+                    if (String.IsNullOrEmpty(e.PropertyName) || e.PropertyName == "CanBuild")
+                        rebuildSelectionCommand.Refresh();
+                }
+            });
         }
 
         #region Utils
+
+        private void RebuildSelection(object p)
+        {
+            /* saving old depdencies states (we won't rebuild them) */
+            var oldDepStates = new Dictionary<XmlCirrusPackageReference, bool>();
+
+            foreach (var dep in editorApplication.CurrentPackage.CirrusReferences)
+            {
+                oldDepStates[dep] = dep.Build;
+                dep.Build = false;
+            }
+
+            /* used to build only what is needed */
+            var selectionsFilter = (from selectedItem in editorApplication.SelectionForProperties
+                                    where (selectedItem is EditorContentFile || selectedItem is EditorUIContentFile)
+                                    select ((selectedItem is EditorContentFile)
+                                             ? ((EditorContentFile)selectedItem).CurrentPath
+                                             : ((EditorUIContentFile)selectedItem).EdFile.CurrentPath
+                                           )
+                                    ).ToList();
+
+            try
+            {
+                /* starts an asynchronous build */
+
+                editorApplication.Builder.ActionRebuildAll("SingleItemBuild", file => selectionsFilter.Contains(file.CurrentPath, StringComparer.OrdinalIgnoreCase));
+            }
+            finally
+            {
+                /* because the build process operate on a copy of the package, we can safely restore dependencies states */
+                foreach (var dep in editorApplication.CurrentPackage.CirrusReferences)
+                {
+                    dep.Build = oldDepStates[dep];
+                }
+            }
+        }
 
         private void EditIgnoreList(object p)
         {
