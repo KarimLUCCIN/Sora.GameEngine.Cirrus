@@ -140,6 +140,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
         /// Root path of the package. Everything inside this directory will be available.
         /// </summary>
         /// <remarks>The root can be a path relative to this package directory</remarks>
+        [Description("Root path of the package. Everything inside this directory will be available (ignoring only filtered elements)")]
         public string RootDirectory
         {
             get { return Editor.CurrentPackage.RootDirectory; }
@@ -149,6 +150,17 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
                 RaisePropertyChanged("RootDirectory");
 
                 RefreshContent();
+            }
+        }
+        
+        [Description("Starting from RootDirectory, the relative directory in which content importers and processors will be run")]
+        public string BuildRootRelativeDirectory
+        {
+            get { return Editor.CurrentPackage.BuildRootRelativeDirectory; }
+            set
+            {
+                Editor.CurrentPackage.BuildRootRelativeDirectory = value;
+                RaisePropertyChanged("BuildRootRelativeDirectory");
             }
         }
 

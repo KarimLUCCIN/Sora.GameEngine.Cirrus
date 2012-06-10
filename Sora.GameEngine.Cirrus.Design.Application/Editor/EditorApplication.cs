@@ -127,6 +127,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
         {
             currentPackage.Name = "Untitled";
             currentPackage.RootDirectory = String.Empty;
+            currentPackage.BuildRootRelativeDirectory = String.Empty;
 
             var asm_list = (from asm in Helper.GetDefaultXNAReferences() select asm).Distinct().ToArray();
 

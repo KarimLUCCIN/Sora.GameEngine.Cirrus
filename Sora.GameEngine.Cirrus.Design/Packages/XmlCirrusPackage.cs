@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Sora.GameEngine.Cirrus.Design.Packages
 {
@@ -56,6 +57,9 @@ namespace Sora.GameEngine.Cirrus.Design.Packages
         /// <remarks>The root can be a path relative to this package directory</remarks>
         [XmlAttribute("root")]
         public string RootDirectory { get; set; }
+
+        [XmlAttribute("buildroot")]
+        public string BuildRootRelativeDirectory { get; set; }
 
         [XmlAttribute("compress")]
         public bool CompressContent { get; set; }

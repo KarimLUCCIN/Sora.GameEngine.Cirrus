@@ -364,7 +364,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
                     }
                     else
                     {
-                        Build_Message(String.Format("--- Ignore --- The package {0} has be ignored because not marked for Build", packageReference.Reference),
+                        Build_Message(String.Format("--- Ignore --- The package {0} has been ignored because not marked for Build", packageReference.Reference),
                             "PackageReferenceCondition", BuildMessageSeverity.Information);
                     }
                 }
@@ -479,7 +479,10 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             // output file name  
             //  
             build.RootDirectory = GetContentBaseDirectory(packageCopy);
-            Environment.CurrentDirectory = build.RootDirectory;
+
+            Environment.CurrentDirectory = String.IsNullOrEmpty(packageCopy.CurrentPackage.BuildRootRelativeDirectory)
+            ? build.RootDirectory
+            : Path.Combine(build.RootDirectory, packageCopy.CurrentPackage.BuildRootRelativeDirectory);
 
             build.IntermediateDirectory = XNAIntermediateDirectory;
             build.LoggerRootDirectory = null;
@@ -612,9 +615,33 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Build
             var outputBaseDirectory = GetOutputBaseDirectory(packageCopy);
 
             XNAOutputDirectory = Path.Combine(outputBaseDirectory, GetSafeContentDirectorySuffix(packageCopy));
-            XNAIntermediateDirectory = Path.Combine(outputBaseDirectory, "ContentIntermediate");
+
+            /* each content has to have an independant intermediate directory, so we generate an unique key for them (approximately) */
+            var xnaIntermediateSubDir = Path.Combine("ContentIntermediate", GenerateContentSubDirectory(packageCopy.CurrentPackagePath));
+            XNAIntermediateDirectory = Path.Combine(outputBaseDirectory, xnaIntermediateSubDir);
 
             XNALogger = new BuildLogger(this);
+        }
+
+        public string GetMD5Hash(string input)
+        {
+            var md5prod = new System.Security.Cryptography.MD5CryptoServiceProvider();
+            var input_str = System.Text.Encoding.UTF8.GetBytes(input);
+
+            input_str = md5prod.ComputeHash(input_str);
+            var result = new System.Text.StringBuilder();
+
+            foreach (var b in input_str)
+            {
+                result.Append(b.ToString("x2").ToLower());
+            }
+
+            return result.ToString();
+        }
+
+        private string GenerateContentSubDirectory(string path)
+        {
+            return String.Format("{0}_{1}", GetMD5Hash(path), Path.GetFileNameWithoutExtension(path));
         }
 
         private static string GetOutputBaseDirectory(EditorApplication packageCopy)
