@@ -12,5 +12,14 @@ namespace Sora.GameEngine.Cirrus.UI
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+        }
+
+        void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show(e.ExceptionObject.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }   
     }
 }
