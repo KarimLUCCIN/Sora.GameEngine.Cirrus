@@ -68,9 +68,11 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
         PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
         {
             return new PropertyDescriptorCollection((
+                
                 from property in Properties
                 where property.Value != null
                 select new CustomEntryPropertyDescriptor(property.Key, property.Value.EditorType, attributes)
+
                 ).ToArray());
         }
 
@@ -133,7 +135,7 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
 
             public override bool ShouldSerializeValue(object component)
             {
-                return false;
+                return true;
             }
         }
     }

@@ -67,17 +67,22 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings.Helpers
             )
             : base(editorType == null ? typeof(TEditorType) : editorType)
         {
-            if (convertToEditor == null)
-                throw new ArgumentNullException("convertToEditor");
-
-            if (convertToProperty == null)
-                throw new ArgumentNullException("convertToProperty");
+            CheckCallBacks(convertToEditor, convertToProperty);
 
             this.convertToEditor = convertToEditor;
             this.convertToProperty = convertToProperty;
             this.valueChanged = valueChanged;
 
             value = baseValue;
+        }
+
+        protected virtual void CheckCallBacks(Func<TPropertyType, TEditorType> convertToEditor, Func<TEditorType, TPropertyType> convertToProperty)
+        {
+            if (convertToEditor == null)
+                throw new ArgumentNullException("convertToEditor");
+
+            if (convertToProperty == null)
+                throw new ArgumentNullException("convertToProperty");
         }
 
         private TPropertyType value;

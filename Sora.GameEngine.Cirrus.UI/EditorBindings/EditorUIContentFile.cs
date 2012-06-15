@@ -139,10 +139,11 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
 
         [Category("Processor")]
         [TypeConverter(typeof(ExpandableObjectConverter))]
+        [Browsable(true)]
         public DictionaryCustomPropertiesProvider ProcessorProperties
         {
             get { return processorProperties; }
-            set
+            private set
             {
                 processorProperties = value;
                 RaisePropertyChanged("ProcessorProperties");
@@ -194,8 +195,8 @@ namespace Sora.GameEngine.Cirrus.UI.EditorBindings
             {
                 processorProperties.Properties[property.Key] = new CustomEditorValidatedProperty<object, object>(
                     defaultValue,
-                    (a) => Convert.ToString(a),
-                    (b) => Convert.ChangeType(b, descriptor.Type),
+                    (a) => a,
+                    (b) => b,
                     (v) =>
                     {
                         EdFile.SetTypedProperty(property.Key, v);

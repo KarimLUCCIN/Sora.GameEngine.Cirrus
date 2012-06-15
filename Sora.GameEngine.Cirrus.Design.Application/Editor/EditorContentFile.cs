@@ -7,6 +7,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Activities.Presentation.PropertyEditing;
 using Sora.GameEngine.Cirrus.Design.Packages;
+using System.Globalization;
 
 namespace Sora.GameEngine.Cirrus.Design.Application.Editor
 {
@@ -160,9 +161,9 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
                     else
                     {
                         if (type.IsEnum)
-                            return Enum.Parse(type, property.Value);
+                            return Enum.Parse(type, property.Value, true);
                         else
-                            return Convert.ChangeType(property.Value, type);
+                            return Convert.ChangeType(property.Value, type, CultureInfo.InvariantCulture.NumberFormat);
                     }
                 }
             }
@@ -177,7 +178,7 @@ namespace Sora.GameEngine.Cirrus.Design.Application.Editor
             var info = Editor.CurrentPackage.GetItemDescriptor(RelativePath, true);
             var property = info.GetProperty(name, true);
 
-            property.Value = Convert.ToString(value);
+            property.Value = Convert.ToString(value, CultureInfo.InvariantCulture.NumberFormat);
 
             CommitContentInfo();
         }
